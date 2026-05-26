@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ЭлектроВизуализатор v2</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root, [data-theme="light"] {
+      --font-body: 'Inter', system-ui, sans-serif;
+      --bg: #f5f7f6;
+      --surface: #ffffff;
+      --surface-2: #eef2f1;
+      --text: #14211d;
+      --muted: #61706a;
+      --border: rgba(20,33,29,.12);
+      --primary: #0f766e;
+      --primary-2: #155e75;
+      --warn: #b45309;
+      --danger: #b91c1c;
+      --ok: #166534;
+      --shadow: 0 12px 30px rgba(15,23,42,.08);
+    }
+    [data-theme="dark"] {
+      --bg: #0b1220;
+      --surface: #0f172a;
+      --surface-2: #162033;
+      --text: #e5eef8;
+      --muted: #94a3b8;
+      --border: rgba(226,232,240,.12);
+      --primary: #4fd1c5;
+      --primary-2: #38bdf8;
+      --warn: #f59e0b;
+      --danger: #f87171;
+      --ok: #4ade80;
+      --shadow: 0 18px 42px rgba(0,0,0,.28);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--text);
+      background: linear-gradient(180deg, var(--bg), color-mix(in srgb, var(--bg) 75%, var(--primary) 25%));
+    }
+    .app {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      min-height: 100vh;
+    }
+    .sidebar, .panel {
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+    .sidebar { padding: 18px; position: sticky; top: 16px; height: fit-content; }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .logo {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      display:flex; align-items:center; justify-content:center; color:white;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.2);
+    }
+    h1 { font-size: 1.4rem; margin: 0; }
+    .sub { color: var(--muted); font-size: .92rem; margin-top: 4px; }
+    .nav { display: grid; gap: 8px; margin: 18px 0; }
+    .nav button {
+      text-align: left; width: 100%; padding: 12px 14px; border-radius: 12px;
+      border: 1px solid transparent; background: transparent; color: var(--text);
+      font-weight: 600; cursor: pointer;
+    }
+    .nav button.active { background: color-mix(in srgb, var(--primary) 12%, var(--surface)); border-color: var(--border); }
+    .theme-btn, .action-btn {
+      width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--text); cursor: pointer; font-weight: 600;
+    }
+    .main { display: grid; gap: 20px; }
+    .hero {
+      padding: 22px; display: flex; justify-content: space-between; gap: 20px; align-items: center;
+    }
+    .hero h2 { margin: 0 0 10px; font-size: clamp(1.5rem, 2vw, 2rem); }
+    .hero p { margin: 0; color: var(--muted); max-width: 68ch; }
+    .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .pill {
+      display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px;
+      background: color-mix(in srgb, var(--primary) 10%, var(--surface)); border:1px solid var(--border); font-size:.88rem;
+    }
+    .layout { display:grid; grid-template-columns: 1.2fr .8fr; gap:20px; }
+    .panel { padding: 18px; }
+    .panel h3 { margin: 0 0 14px; font-size: 1.08rem; }
+    .tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+    .tab {
+      padding:10px 12px; border-radius: 10px; border:1px solid var(--border); background: var(--surface-2);
+      cursor:pointer; font-weight:600;
+    }
+    .tab.active { background: color-mix(in srgb, var(--primary) 15%, var(--surface)); }
+    .fields { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; }
+    .field { display:grid; gap:6px; }
+    .field.full { grid-column: 1 / -1; }
+    label { font-size: .92rem; color: var(--text); }
+    input, select {
+      width: 100%; padding: 11px 12px; border-radius: 10px; border:1px solid var(--border);
+      background: var(--surface-2); color: var(--text); font-size: .95rem;
+    }
+    .btn-row { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+    .btn {
+      padding:11px 14px; border-radius: 10px; border:1px solid var(--border); cursor:pointer; font-weight:700;
+      background: var(--surface-2); color: var(--text);
+    }
+    .btn.primary { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: white; border-color: transparent; }
+    .btn.warn { color: var(--warn); }
+    .cards { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; }
+    .card {
+      padding:14px; border-radius: 14px; background: var(--surface-2); border:1px solid var(--border);
+    }
+    .card small { display:block; color: var(--muted); margin-bottom:6px; }
+    .value { font-size: 1.22rem; font-weight: 800; }
+    .formula {
+      margin-top:14px; padding:14px; border-radius:12px; background: color-mix(in srgb, var(--surface-2) 80%, var(--primary) 20%);
+      border:1px dashed var(--border); color: var(--text);
+    }
+    .chart { height: 460px; }
+    .table-wrap { overflow:auto; border-radius:14px; border:1px solid var(--border); }
+    table { width:100%; border-collapse: collapse; font-size:.92rem; }
+    th, td { padding:10px 12px; border-bottom:1px solid var(--border); text-align:left; }
+    th { background: var(--surface-2); position: sticky; top: 0; }
+    .status { margin-top: 12px; color: var(--muted); }
+    .bad { color: var(--danger); }
+    .good { color: var(--ok); }
+    .hidden { display:none; }
+    @media (max-width: 1120px) {
+      .app, .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+    }
+    @media (max-width: 720px) {
+      .fields, .cards { grid-template-columns: 1fr; }
+      .hero { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L6 14h5l-1 8 8-12h-5l0-8z"/>
+          </svg>
+        </div>
+        <div>
+          <h1>ЭлектроВизуализатор v2</h1>
+          <div class="sub">Расчёты, графики и таблицы</div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Разделы">
+        <button class="nav-btn active" data-section="dc">Постоянный ток</button>
+        <button class="nav-btn" data-section="ac">Переменный ток</button>
+        <button class="nav-btn" data-section="rc">RC / RL цепи</button>
+        <button class="nav-btn" data-section="divider">Делители и мосты</button>
+      </nav>
+
+      <button class="theme-btn" id="themeToggle">Сменить тему</button>
+      <div class="status" style="margin-top:14px;">Вторая версия добавляет импеданс, фазовый сдвиг, реактивные элементы и табличный sweep.</div>
+    </aside>
+
+    <main class="main">
+      <section class="panel hero">
+        <div>
+          <div class="pill">Инженерный режим</div>
+          <h2>Расчёт электрических параметров с визуализацией зависимостей</h2>
+          <p>Приложение умеет считать параметры для DC и AC цепей, строить графики по диапазону, показывать комплексные связи между сопротивлением, реактивностью, импедансом, мощностью и откликом RC/RL цепей.</p>
+        </div>
+        <div class="hero-actions">
+          <button class="btn primary" onclick="runCurrentSection()">Пересчитать всё</button>
+          <button class="btn" onclick="downloadCSV()">Скачать CSV</button>
+        </div>
+      </section>
+
+      <div class="layout">
+        <section class="panel">
+          <div id="section-dc" class="section-block">
+            <h3>Постоянный ток</h3>
+            <div class="tabs">
+              <button class="tab active" data-dc-tab="ohm">Закон Ома</button>
+              <button class="tab" data-dc-tab="power">Мощность</button>
+              <button class="tab" data-dc-tab="energy">Энергия</button>
+            </div>
+            <div class="fields" id="dc-fields"></div>
+            <div class="btn-row">
+              <button class="btn primary" onclick="calcDC()">Рассчитать</button>
+              <button class="btn" onclick="drawDC()">График</button>
+              <button class="btn warn" onclick="resetDC()">Сброс</button>
+            </div>
+            <div class="formula" id="dc-formula"></div>
+          </div>
+
+          <div id="section-ac" class="section-block hidden">
+            <h3>Переменный ток</h3>
+            <div class="fields">
+              <div class="field"><label>Напряжение U, В</label><input id="acU" value="230"></div>
+              <div class="field"><label>Ток I, А</label><input id="acI" value="5"></div>
+              <div class="field"><label>Коэффициент мощности cosφ</label><input id="acCos" value="0.85"></div>
+              <div class="field"><label>Частота f, Гц</label><input id="acF" value="50"></div>
+              <div class="field"><label>Индуктивность L, Гн</label><input id="acL" value="0.08"></div>
+              <div class="field"><label>Ёмкость C, мкФ</label><input id="acC" value="47"></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn primary" onclick="calcAC()">Рассчитать</button>
+              <button class="btn" onclick="drawAC()">График</button>
+            </div>
+            <div class="formula">AC: S = U·I, P = U·I·cosφ, Q = U·I·sinφ, Xl = 2πfL, Xc = 1 / (2πfC), Z = √(R² + X²)</div>
+          </div>
+
+          <div id="section-rc" class="section-block hidden">
+            <h3>RC / RL цепи</h3>
+            <div class="tabs">
+              <button class="tab active" data-trl-tab="rc">RC-фильтр</button>
+              <button class="tab" data-trl-tab="rl">RL-фильтр</button>
+            </div>
+            <div class="fields">
+              <div class="field"><label>R, Ом</label><input id="trlR" value="1000"></div>
+              <div class="field"><label>C, мкФ</label><input id="trlC" value="0.47"></div>
+              <div class="field"><label>L, Гн</label><input id="trlL" value="0.15"></div>
+              <div class="field"><label>Uвх, В</label><input id="trlVin" value="5"></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn primary" onclick="calcTRL()">Рассчитать</button>
+              <button class="btn" onclick="drawTRL()">График</button>
+            </div>
+            <div class="formula" id="trl-formula"></div>
+          </div>
+
+          <div id="section-divider" class="section-block hidden">
+            <h3>Делители и мосты</h3>
+            <div class="tabs">
+              <button class="tab active" data-div-tab="divider">Делитель напряжения</button>
+              <button class="tab" data-div-tab="bridge">Уитстон</button>
+            </div>
+            <div class="fields" id="div-fields"></div>
+            <div class="btn-row">
+              <button class="btn primary" onclick="calcDivider()">Рассчитать</button>
+              <button class="btn" onclick="drawDivider()">График</button>
+            </div>
+            <div class="formula" id="div-formula"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h3>Результаты</h3>
+          <div class="cards" id="results"></div>
+          <div id="statusBox" class="status"></div>
+        </section>
+      </div>
+
+      <section class="panel">
+        <h3>График</h3>
+        <div id="chart" class="chart"></div>
+      </section>
+
+      <section class="panel">
+        <h3>Таблица диапазона</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr id="tableHead"></tr></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+<script>
+let currentSection = 'dc';
+let dcTab = 'ohm';
+let trlTab = 'rc';
+let divTab = 'divider';
+let csvData = [];
+
+const fmt = (v, u='') => {
+  if (v === null || v === undefined || Number.isNaN(v) || !Number.isFinite(v)) return '—';
+  const a = Math.abs(v);
+  let n=v,p='';
+  if (a>=1e6) { n=v/1e6; p='M'; }
+  else if (a>=1e3) { n=v/1e3; p='k'; }
+  else if (a>0 && a<1e-6) { n=v*1e9; p='n'; }
+  else if (a>0 && a<1e-3) { n=v*1e6; p='µ'; }
+  else if (a>0 && a<1) { n=v*1e3; p='m'; }
+  return `${Number(n).toFixed(4).replace(/\.0+$/,'').replace(/(\.\d*?)0+$/,'$1')} ${p}${u}`.trim();
+};
+const $ = id => document.getElementById(id);
+const n = id => Number($(id).value);
+function setStatus(msg, cls='') { $('statusBox').className = 'status ' + cls; $('statusBox').innerHTML = msg; }
+function renderCards(items) {
+  $('results').innerHTML = items.map(([name,val,unit]) => `<div class="card"><small>${name}</small><div class="value">${fmt(val,unit)}</div></div>`).join('');
+}
+function renderTable(headers, rows) {
+  $('tableHead').innerHTML = headers.map(h => `<th>${h}</th>`).join('');
+  $('tableBody').innerHTML = rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('');
+  csvData = [headers, ...rows];
+}
+function plot(title, x, y, xTitle, yTitle, y2=null, y2Title='') {
+  const traces = [{x,y,type:'scatter',mode:'lines',name:yTitle,line:{width:3,color:'#14b8a6'}}];
+  if (y2) traces.push({x,y:y2,type:'scatter',mode:'lines',name:y2Title,line:{width:3,color:'#0ea5e9'}});
+  Plotly.newPlot('chart', traces, {
+    title,
+    paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
+    font:{color:getComputedStyle(document.body).getPropertyValue('--text')},
+    xaxis:{title:xTitle, gridcolor:'rgba(128,128,128,.18)'},
+    yaxis:{title:yTitle, gridcolor:'rgba(128,128,128,.18)'},
+    margin:{l:60,r:20,t:60,b:60}
+  }, {responsive:true});
+}
+
+function initTheme(){
+  let d = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', d);
+  $('themeToggle').onclick = () => {
+    d = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', d);
+    runCurrentSection();
+  };
+}
+
+function switchSection(sec){
+  currentSection = sec;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.section===sec));
+  document.querySelectorAll('.section-block').forEach(el => el.classList.add('hidden'));
+  $('section-'+sec).classList.remove('hidden');
+  runCurrentSection();
+}
+
+document.querySelectorAll('.nav-btn').forEach(b => b.onclick = () => switchSection(b.dataset.section));
+document.querySelectorAll('[data-dc-tab]').forEach(b => b.onclick = () => {
+  dcTab = b.dataset.dcTab;
+  document.querySelectorAll('[data-dc-tab]').forEach(x => x.classList.toggle('active', x===b));
+  renderDCFields();
+  calcDC();
+});
+document.querySelectorAll('[data-trl-tab]').forEach(b => b.onclick = () => {
+  trlTab = b.dataset.trlTab;
+  document.querySelectorAll('[data-trl-tab]').forEach(x => x.classList.toggle('active', x===b));
+  calcTRL();
+});
+document.querySelectorAll('[data-div-tab]').forEach(b => b.onclick = () => {
+  divTab = b.dataset.divTab;
+  document.querySelectorAll('[data-div-tab]').forEach(x => x.classList.toggle('active', x===b));
+  renderDivFields();
+  calcDivider();
+});
+
+function renderDCFields(){
+  const maps = {
+    ohm: [['dcU','Напряжение U, В','12'],['dcI','Ток I, А',''],['dcR','Сопротивление R, Ом','6']],
+    power: [['dcP','Мощность P, Вт',''],['dcPU','Напряжение U, В','220'],['dcPI','Ток I, А','2']],
+    energy: [['dcE','Энергия E, Вт·ч',''],['dcEP','Мощность P, Вт','150'],['dcEt','Время t, ч','4']]
+  };
+  $('dc-fields').innerHTML = maps[dcTab].map(([id,l,v]) => `<div class="field"><label>${l}</label><input id="${id}" value="${v}"></div>`).join('');
+  $('dc-formula').textContent = dcTab==='ohm' ? 'U = I·R, I = U/R, R = U/I, P = U·I' : dcTab==='power' ? 'P = U·I, U = P/I, I = P/U' : 'E = P·t, P = E/t, t = E/P';
+}
+function calcDC(){
+  let items=[], rows=[], headers=[];
+  if (dcTab==='ohm') {
+    let U = $('dcU').value===''?null:n('dcU'), I = $('dcI').value===''?null:n('dcI'), R = $('dcR').value===''?null:n('dcR');
+    const filled = [U,I,R].filter(v=>v!==null).length;
+    if (filled<2) return setStatus('Для закона Ома нужно минимум два параметра.', 'bad');
+    if (U===null) U = I*R; else if (I===null) I = U/R; else if (R===null) R = U/I;
+    const P = U*I;
+    items = [['Напряжение',U,'В'],['Ток',I,'А'],['Сопротивление',R,'Ом'],['Мощность',P,'Вт']];
+    headers=['U, В','I, А'];
+    for(let u=0; u<=U*1.5+1; u+=(U*1.5+1)/16) rows.push([fmt(u), fmt(u/R)]);
+    renderTable(headers, rows); plot('Закон Ома: ток от напряжения', rows.map(r=>Number(r[0].split(' ')[0])), rows.map((_,i)=> (i*((U*1.5+1)/16))/R), 'Напряжение, В', 'Ток, А');
+    setStatus('Расчёт DC выполнен.', 'good');
+  }
+  if (dcTab==='power') {
+    let P = $('dcP').value===''?null:n('dcP'), U = $('dcPU').value===''?null:n('dcPU'), I = $('dcPI').value===''?null:n('dcPI');
+    const filled = [P,U,I].filter(v=>v!==null).length;
+    if (filled<2) return setStatus('Для мощности нужно минимум два параметра.', 'bad');
+    if (P===null) P = U*I; else if (U===null) U = P/I; else if (I===null) I = P/U;
+    const R = U/I;
+    items = [['Мощность',P,'Вт'],['Напряжение',U,'В'],['Ток',I,'А'],['Экв. сопротивление',R,'Ом']];
+    headers=['U, В','P, Вт']; rows=[];
+    let xs=[], ys=[]; for(let u=0; u<=U*1.5+1; u+=(U*1.5+1)/16){ xs.push(u); ys.push(u*I); rows.push([fmt(u), fmt(u*I)]); }
+    renderTable(headers, rows); plot('Мощность от напряжения', xs, ys, 'Напряжение, В', 'Мощность, Вт'); setStatus('Расчёт мощности выполнен.', 'good');
+  }
+  if (dcTab==='energy') {
+    let E = $('dcE').value===''?null:n('dcE'), P = $('dcEP').value===''?null:n('dcEP'), t = $('dcEt').value===''?null:n('dcEt');
+    const filled = [E,P,t].filter(v=>v!==null).length;
+    if (filled<2) return setStatus('Для энергии нужно минимум два параметра.', 'bad');
+    if (E===null) E = P*t; else if (P===null) P = E/t; else if (t===null) t = E/P;
+    items = [['Энергия',E,'Вт·ч'],['Мощность',P,'Вт'],['Время',t,'ч']];
+    headers=['t, ч','E, Вт·ч']; rows=[];
+    let xs=[], ys=[]; for(let tt=0; tt<=t*1.5+0.5; tt+=(t*1.5+0.5)/16){ xs.push(tt); ys.push(P*tt); rows.push([fmt(tt), fmt(P*tt)]); }
+    renderTable(headers, rows); plot('Энергия от времени', xs, ys, 'Время, ч', 'Энергия, Вт·ч'); setStatus('Расчёт энергии выполнен.', 'good');
+  }
+  renderCards(items);
+}
+function drawDC(){ calcDC(); }
+function resetDC(){ renderDCFields(); calcDC(); }
+
+function calcAC(){
+  const U=n('acU'), I=n('acI'), cosf=n('acCos'), f=n('acF'), L=n('acL'), Cmicro=n('acC');
+  const phi=Math.acos(Math.min(1,Math.max(-1,cosf)));
+  const S=U*I, P=U*I*cosf, Q=U*I*Math.sin(phi);
+  const Xl=2*Math.PI*f*L;
+  const C=Cmicro*1e-6;
+  const Xc=1/(2*Math.PI*f*C);
+  const Z=U/I;
+  const R=Z*cosf;
+  const X=Math.sqrt(Math.max(0,Z*Z-R*R));
+  renderCards([
+    ['Полная мощность S',S,'ВА'],['Активная мощность P',P,'Вт'],['Реактивная мощность Q',Q,'вар'],
+    ['Импеданс Z',Z,'Ом'],['Активное сопротивление R',R,'Ом'],['Реактивная часть X',X,'Ом'],
+    ['Индуктивное Xl',Xl,'Ом'],['Ёмкостное Xc',Xc,'Ом'],['Фазовый угол φ',phi*180/Math.PI,'°']
+  ]);
+  let headers=['f, Гц','Xl, Ом','Xc, Ом']; let rows=[], xs=[], y1=[], y2=[];
+  for(let ff=1; ff<=Math.max(500,f*4); ff+=Math.max(5,Math.max(500,f*4)/24)){
+    const xl=2*Math.PI*ff*L, xc=1/(2*Math.PI*ff*C); xs.push(ff); y1.push(xl); y2.push(xc); rows.push([fmt(ff), fmt(xl), fmt(xc)]);
+  }
+  renderTable(headers, rows); plot('Реактивности от частоты', xs, y1, 'Частота, Гц', 'Xl, Ом', y2, 'Xc, Ом');
+  setStatus('AC-расчёт выполнен: вычислены мощности, импеданс и фазовый угол.', 'good');
+}
+function drawAC(){ calcAC(); }
+
+function calcTRL(){
+  const R=n('trlR'), C=n('trlC')*1e-6, L=n('trlL'), Vin=n('trlVin');
+  if (trlTab==='rc') {
+    const tau=R*C, fc=1/(2*Math.PI*R*C);
+    renderCards([['Постоянная времени τ',tau,'с'],['Частота среза fc',fc,'Гц'],['Входное напряжение',Vin,'В']]);
+    $('trl-formula').textContent='RC: τ = R·C, fc = 1 / (2πRC), |H(jω)| = 1 / √(1 + (ωRC)²)';
+    let xs=[], ys=[], rows=[];
+    for(let f=1; f<=Math.max(fc*10,5000); f*=1.35){ const gain=1/Math.sqrt(1+Math.pow(2*Math.PI*f*R*C,2)); xs.push(f); ys.push(gain*Vin); rows.push([fmt(f), fmt(gain), fmt(gain*Vin,'В')]); }
+    renderTable(['f, Гц','|H|','Uвых, В'], rows); plot('RC: амплитуда выходного напряжения', xs, ys, 'Частота, Гц', 'Uвых, В'); setStatus('RC-цепь рассчитана.', 'good');
+  } else {
+    const tau=L/R, fc=R/(2*Math.PI*L);
+    renderCards([['Постоянная времени τ',tau,'с'],['Частота среза fc',fc,'Гц'],['Входное напряжение',Vin,'В']]);
+    $('trl-formula').textContent='RL: τ = L / R, fc = R / (2πL), |H(jω)| для RL зависит от выбранного выхода';
+    let xs=[], ys=[], rows=[];
+    for(let f=1; f<=Math.max(fc*10,5000); f*=1.35){ const w=2*Math.PI*f; const gain=(w*L)/Math.sqrt(R*R+(w*L)*(w*L)); xs.push(f); ys.push(gain*Vin); rows.push([fmt(f), fmt(gain), fmt(gain*Vin,'В')]); }
+    renderTable(['f, Гц','|H|','Uвых, В'], rows); plot('RL: амплитуда выходного напряжения', xs, ys, 'Частота, Гц', 'Uвых, В'); setStatus('RL-цепь рассчитана.', 'good');
+  }
+}
+function drawTRL(){ calcTRL(); }
+
+function renderDivFields(){
+  if (divTab==='divider') {
+    $('div-fields').innerHTML = `
+      <div class="field"><label>Uвх, В</label><input id="dvVin" value="12"></div>
+      <div class="field"><label>R1, Ом</label><input id="dvR1" value="1000"></div>
+      <div class="field"><label>R2, Ом</label><input id="dvR2" value="2200"></div>`;
+    $('div-formula').textContent='Uвых = Uвх · R2 / (R1 + R2)';
+  } else {
+    $('div-fields').innerHTML = `
+      <div class="field"><label>R1, Ом</label><input id="brR1" value="1000"></div>
+      <div class="field"><label>R2, Ом</label><input id="brR2" value="1000"></div>
+      <div class="field"><label>R3, Ом</label><input id="brR3" value="1200"></div>
+      <div class="field"><label>R4, Ом</label><input id="brR4" value="1200"></div>`;
+    $('div-formula').textContent='Мост Уитстона сбалансирован, если R1 / R2 = R3 / R4';
+  }
+}
+function calcDivider(){
+  if (divTab==='divider') {
+    const Vin=n('dvVin'), R1=n('dvR1'), R2=n('dvR2');
+    const Vout=Vin*R2/(R1+R2), I=Vin/(R1+R2), P=Vin*I;
+    renderCards([['Выходное напряжение',Vout,'В'],['Ток цепи',I,'А'],['Общая мощность',P,'Вт']]);
+    let xs=[], ys=[], rows=[];
+    for(let r2=100; r2<=R2*2+100; r2+=(R2*2)/18){ const v=Vin*r2/(R1+r2); xs.push(r2); ys.push(v); rows.push([fmt(r2), fmt(v,'В')]); }
+    renderTable(['R2, Ом','Uвых, В'], rows); plot('Делитель: выход от R2', xs, ys, 'R2, Ом', 'Uвых, В'); setStatus('Делитель напряжения рассчитан.', 'good');
+  } else {
+    const R1=n('brR1'), R2=n('brR2'), R3=n('brR3'), R4=n('brR4');
+    const left=R1/R2, right=R3/R4, delta=left-right;
+    renderCards([['R1/R2',left,''],['R3/R4',right,''],['Отклонение баланса',delta,'']]);
+    let xs=[], ys=[], rows=[];
+    for(let r4=Math.max(1,R4*0.3); r4<=R4*2; r4+=(R4*1.7)/18){ const d=left-(R3/r4); xs.push(r4); ys.push(d); rows.push([fmt(r4), fmt(d)]); }
+    renderTable(['R4, Ом','Δ баланса'], rows); plot('Мост Уитстона: отклонение баланса', xs, ys, 'R4, Ом', 'Δ'); setStatus(Math.abs(delta)<1e-6 ? 'Мост сбалансирован.' : 'Мост не сбалансирован.', Math.abs(delta)<1e-6 ? 'good' : 'bad');
+  }
+}
+function drawDivider(){ calcDivider(); }
+
+function runCurrentSection(){
+  if (currentSection==='dc') calcDC();
+  if (currentSection==='ac') calcAC();
+  if (currentSection==='rc') calcTRL();
+  if (currentSection==='divider') calcDivider();
+}
+function downloadCSV(){
+  if (!csvData.length) return;
+  const csv = csvData.map(r => r.join(';')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'electro-visualizer-table.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+renderDCFields();
+renderDivFields();
+$('trl-formula').textContent='RC: τ = R·C, RL: τ = L/R';
+initTheme();
+runCurrentSection();
+</script>
+</body>
+</html>
