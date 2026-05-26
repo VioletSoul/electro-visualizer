@@ -21,620 +21,621 @@
 ![Docs](https://img.shields.io/badge/docs-RU-6b7280)
 ![Offline](https://img.shields.io/badge/offline-supported-334155)
 
-**Electro Visualizer Ultimate** — это финальная объединённая версия инженерного HTML-инструмента, в которой базовые, advanced и pro-режимы собраны в одном автономном файле. Приложение открывается локально в браузере, не требует сборки или backend и совмещает быстрые расчёты, sweep-анализ, графики, таблицы и экспорт CSV.
+**Electro Visualizer Ultimate** is the final unified version of an engineering HTML tool that combines basic, advanced, and pro modes in a single standalone file. The app runs locally in the browser, requires no build step or backend, and combines quick calculations, sweep analysis, charts, tables, and CSV export.
 
-Финальная Ultimate-версия сохраняет весь вычислительный функционал в одном интерфейсе: слева находится навигация по группам режимов, в центре — панель параметров и результатов, ниже — график и sweep-таблица, а сверху показываются активный режим, ключевой итог, вторичный показатель и число sweep-точек.
+The Ultimate release keeps all computational functionality in one interface: navigation by mode groups on the left, a parameters and results panel in the center, a chart and sweep table below, and at the top a strip with the active mode, key result, secondary metric, and the sweep point count.
 
-Этот документ описывает назначение приложения, архитектуру, поддерживаемые режимы, математическую модель, UI-структуру, форматы представления данных, сценарии использования и ограничения финальной Ultimate-сборки.
+This document describes the purpose of the app, its architecture, supported modes, mathematical model, UI structure, data formats, usage scenarios, and the limitations of the final Ultimate build.
 
 ---
 
-## Содержание
+## Table of contents
 
-- [Общее описание](#общее-описание)
-- [Что изменилось в Ultimate](#что-изменилось-в-ultimate)
-- [Ключевые возможности](#ключевые-возможности)
-- [Для кого этот проект](#для-кого-этот-проект)
-- [Архитектурная идея](#архитектурная-идея)
-- [Структура интерфейса](#структура-интерфейса)
-- [Группы режимов](#группы-режимов)
-- [Поддерживаемые инженерные режимы](#поддерживаемые-инженерные-режимы)
-- [Математическая модель](#математическая-модель)
-- [Форматы представления результатов](#форматы-представления-результатов)
-- [Sweep-режимы и табличный анализ](#sweep-режимы-и-табличный-анализ)
-- [Графики и визуализация](#графики-и-визуализация)
-- [Экспорт данных](#экспорт-данных)
-- [Типовые сценарии использования](#типовые-сценарии-использования)
-- [Практическая ценность](#практическая-ценность)
-- [Как открыть и использовать](#как-открыть-и-использовать)
-- [Рекомендуемая структура репозитория](#рекомендуемая-структура-репозитория)
-- [Ограничения](#ограничения)
+- [Overview](#overview)
+- [What changed in Ultimate](#what-changed-in-ultimate)
+- [Key capabilities](#key-capabilities)
+- [Who this is for](#who-this-is-for)
+- [Architecture](#architecture)
+- [Interface structure](#interface-structure)
+- [Mode groups](#mode-groups)
+- [Supported engineering modes](#supported-engineering-modes)
+- [Mathematical model](#mathematical-model)
+- [Result formats](#result-formats)
+- [Sweep modes and tabular analysis](#sweep-modes-and-tabular-analysis)
+- [Charts and visualization](#charts-and-visualization)
+- [Data export](#data-export)
+- [Typical usage scenarios](#typical-usage-scenarios)
+- [Practical value](#practical-value)
+- [How to run and use](#how-to-run-and-use)
+- [Repository structure](#repository-structure)
+- [Limitations](#limitations)
 - [FAQ](#faq)
-- [Чеклист возможностей](#чеклист-возможностей)
+- [Feature checklist](#feature-checklist)
+- [License](#license)
 
 ---
 
-## Общее описание
+## Overview
 
-**Electro Visualizer Ultimate** — это автономное HTML-приложение для расчёта, исследования и визуализации электрических параметров, которые регулярно встречаются в курсах электротехники, электроники и теории цепей.
+**Electro Visualizer Ultimate** is a standalone HTML application for computing, exploring, and visualizing electrical quantities that frequently appear in electric circuits, electronics, and circuit theory courses.
 
-В отличие от обычного калькулятора, приложение не ограничивается выводом одного числа. Оно старается показать электрическую величину сразу в нескольких формах:
+Unlike a simple calculator, the app does not stop at a single number. It tries to show an electrical quantity in several forms at once:
 
-- как численный результат;
-- как производную связанную величину;
-- как зависимость на графике;
-- как набор точек в sweep-режиме;
-- как комплексное число;
-- как фазовую интерпретацию;
-- как табличный набор данных для экспорта.
+- as a numeric result;
+- as a derived related quantity;
+- as a curve on a chart;
+- as a set of points in a sweep mode;
+- as a complex number;
+- as a phasor-style interpretation;
+- as a tabular dataset ready for export.
 
-По сути, это не один калькулятор, а компактный инженерный мини-стенд, собранный в одном файле.
-
----
-
-## Что изменилось в Ultimate
-
-Ultimate — это не просто переименование старой версии. Это финальная объединённая сборка, в которой все основные режимы сведены в одну общую рабочую среду.
-
-Ключевые изменения:
-
-- Вместо разрозненных режимов теперь используется единая навигация по группам **Basic**, **Advanced** и **Pro**.
-- Все расчёты работают в одной и той же структуре интерфейса: параметры, результаты, график, sweep-таблица.
-- Добавлены и объединены продвинутые режимы, включая tolerance, sensitivity, Monte Carlo, harmonics и three-phase.
-- Сохранён формат одного автономного HTML-файла.
-- Финальный layout переработан так, чтобы sidebar, summary, результаты и графическая часть были собраны в единую цельную UI-структуру.
+In essence it is not just one calculator but a compact engineering mini-bench packed into a single file.
 
 ---
 
-## Ключевые возможности
+## What changed in Ultimate
 
-Приложение объединяет в одном месте следующие функциональные группы:
+Ultimate is not just a rename of an older version. It is a final unified build where all major modes are merged into a single working environment.
 
-- DC-расчёты: закон Ома, мощность, энергия, сопротивление проводника, делитель напряжения.
-- AC-расчёты: реактивные сопротивления, импеданс, фазовый угол, активная/реактивная/полная мощность.
-- Комплексный анализ: прямоугольная и полярная форма, модуль, угол, действительная и мнимая части.
-- Фазоры: фазовый сдвиг, синусоидальные зависимости, интерпретация напряжения и тока во времени.
-- RC/RL-фильтры: постоянная времени, частота среза, sweep и графическое исследование.
-- RLC-цепи: резонанс, поведение импеданса, добротность, зависимость от частоты.
-- Sweep-режимы: построение табличных наборов точек по заданному диапазону.
-- CSV-экспорт: выгрузка текущих sweep-результатов для внешней обработки.
-- Дополнительный инженерный анализ: tolerance, sensitivity, Monte Carlo, THD и three-phase.
+Key changes:
+
+- Instead of disjoint modes there is a single navigation split into **Basic**, **Advanced**, and **Pro** groups.
+- All calculations share the same interface structure: parameters, results, chart, sweep table.
+- Advanced modes have been added and unified, including tolerance, sensitivity, Monte Carlo, harmonics, and three‑phase.
+- The single-file HTML format is preserved.
+- The final layout was reworked so that sidebar, summary, results, and the chart area form one coherent UI structure.
 
 ---
 
-## Для кого этот проект
+## Key capabilities
 
-Приложение подойдёт для нескольких групп пользователей.
+The app brings together the following functional groups:
 
-### 1. Студенты
-
-Помогает разбирать задачи по электротехнике, проверять ручные вычисления, визуально осваивать связи между параметрами и лучше понимать AC-анализ.
-
-### 2. Преподаватели
-
-Удобно использовать как демонстрационный инструмент на занятиях, поскольку формулы можно сразу связывать с графиками и sweep-таблицами.
-
-### 3. Радиолюбители и практики
-
-Подходит для быстрых инженерных прикидок, оценки импеданса, фильтров, фазовых сдвигов, резонансных эффектов и чувствительности к параметрам.
-
-### 4. Инженеры
-
-Можно применять как компактный локальный инструмент для предварительных расчётов и визуального анализа перед более тяжёлой симуляцией или проектированием.
+- DC calculations: Ohm’s law, power, energy, conductor resistance, voltage divider.
+- AC calculations: reactive impedances, total impedance, phase angle, active/reactive/apparent power.
+- Complex analysis: rectangular and polar form, magnitude, angle, real and imaginary parts.
+- Phasors: phase shift, sinusoidal signals, time-domain interpretation of voltage and current.
+- RC/RL filters: time constant, cutoff frequency, sweep and chart-based exploration.
+- RLC circuits: resonance, impedance vs frequency, Q‑factor.
+- Sweep modes: building tabular datasets over a chosen parameter range.
+- CSV export: downloading the current sweep dataset for external tools.
+- Additional engineering analysis: tolerance, sensitivity, Monte Carlo, THD, three‑phase.
 
 ---
 
-## Архитектурная идея
+## Who this is for
 
-Ultimate задуман как инженерный рабочий стол, а не как последовательность разрозненных формочек.
+The app is useful for several groups of users.
 
-Общая идея архитектуры строится на нескольких принципах:
+### 1. Students
 
-### 1. Один автономный HTML-файл
+Helps solve circuit problems, verify hand calculations, see relationships between quantities, and better understand AC analysis.
 
-Приложение открывается локально в браузере и не требует сервера, установки зависимостей или backend.
+### 2. Instructors
 
-### 2. Несколько представлений одной и той же величины
+Convenient as a demo tool in class, since formulas can be directly linked to charts and sweep tables.
 
-Например, импеданс можно увидеть:
+### 3. Hobbyists and practitioners
 
-- как комплексное число;
-- как модуль;
-- как фазовый угол;
-- как набор значений на sweep;
-- как изменение на графике.
+Good for quick engineering estimates, impedance and filter checks, phase shifts, resonance effects, and sensitivity to parameters.
 
-### 3. Расчёт + исследование
+### 4. Engineers
 
-Приложение совмещает:
-
-- режим точечного расчёта, когда нужны конкретные значения;
-- режим параметрического исследования, когда важна форма зависимости.
-
-### 4. Единый UI-шаблон
-
-Каким бы ни был активный режим, пользователь работает в одной и той же визуальной схеме:
-
-- выбирает режим;
-- вводит параметры;
-- получает карточки результатов;
-- смотрит график;
-- анализирует таблицу;
-- экспортирует CSV при необходимости.
-
-### 5. Практическая переносимость
-
-Открывается почти в любом современном браузере как готовый статический инженерный инструмент.
+Can serve as a compact local tool for preliminary calculations and visual analysis before heavier simulations or full design work.
 
 ---
 
-## Структура интерфейса
+## Architecture
 
-Финальная версия организована как единое рабочее пространство.
+Ultimate is designed as an engineering workspace rather than a set of isolated forms.
+
+The architecture follows several principles:
+
+### 1. Single standalone HTML file
+
+The app opens locally in the browser and does not need a server, dependency installation, or backend.
+
+### 2. Multiple representations of the same quantity
+
+For example, impedance can be viewed:
+
+- as a complex number;
+- as magnitude;
+- as phase angle;
+- as a sweep of values;
+- as a curve on a chart.
+
+### 3. Calculation plus exploration
+
+The app combines:
+
+- a point calculation mode, when a specific value is needed;
+- a parametric exploration mode, when the shape of the dependency matters.
+
+### 4. Unified UI template
+
+Whatever the active mode, the user works in the same visual scheme:
+
+- choose a mode;
+- enter parameters;
+- inspect result cards;
+- view the chart;
+- analyze the table;
+- export CSV if needed.
+
+### 5. Practical portability
+
+Opens in nearly any modern browser as a ready-made static engineering tool.
+
+---
+
+## Interface structure
+
+The final version is organized as a single workspace.
 
 ### 1. Sidebar
 
-Левая панель содержит:
+The left panel contains:
 
-- бренд-блок;
-- переключатель темы;
-- сброс активного режима;
-- навигацию по разделам.
+- a branding block;
+- theme toggle;
+- active mode reset;
+- navigation by sections.
 
-В боковой панели разделы разбиты на **Basic**, **Advanced** и **Pro**.
+The sidebar splits sections into **Basic**, **Advanced**, and **Pro**.
 
-### 2. Верхний блок summary
+### 2. Top summary strip
 
-Верхняя часть основной области показывает:
+The top of the main area shows:
 
-- название активного раздела;
-- краткое описание режима;
-- формулу или ключевое выражение;
-- четыре summary-карточки: режим, ключевой итог, вторичный показатель и число sweep-точек.
+- the active section name;
+- a short mode description;
+- a key formula or expression;
+- four summary cards: mode, key result, secondary metric, and sweep point count.
 
-### 3. Панель параметров
+### 3. Parameters panel
 
-Содержит:
+Includes:
 
-- выбор submode;
-- поля для исходных величин;
-- кнопку расчёта;
-- экспорт CSV.
+- submode selector;
+- input fields for source quantities;
+- a calculate button;
+- CSV export.
 
-### 4. Панель результатов
+### 4. Results panel
 
-Показывает:
+Shows:
 
-- основной результат;
-- вспомогательные вычисленные параметры;
-- производные электрические характеристики;
-- complex-view или текстовое представление результата.
+- main result;
+- auxiliary computed values;
+- derived electrical characteristics;
+- complex-view or textual interpretation of the result.
 
-### 5. Графическая область
+### 5. Chart area
 
-Используется для:
+Used for:
 
-- временных графиков;
-- частотных графиков;
-- sweep-кривых;
-- амплитудных и фазовых зависимостей.
+- time-domain plots;
+- frequency response plots;
+- sweep curves;
+- magnitude and phase plots.
 
-### 6. Табличная область
+### 6. Table area
 
-Показывает sweep-наборы точек и служит основой для экспорта CSV.
+Displays sweep point sets and serves as a basis for CSV export.
 
 ---
 
-## Группы режимов
+## Mode groups
 
-Ultimate использует три основные группы навигации:
+Ultimate uses three main navigation groups:
 
-| Группа | Назначение |
+| Group | Purpose |
 |---|---|
-| **Basic** | Базовые расчёты, повседневные электротехнические задачи, материалы и делители. |
-| **Advanced** | AC-режимы, фильтры, мостовые и промежуточные инженерные режимы. |
-| **Pro** | Комплексный анализ, RLC, фазоры, sweep, tolerance, sensitivity, Monte Carlo, harmonics и three-phase. |
+| **Basic** | Basic calculations, everyday electrical tasks, materials, and dividers. |
+| **Advanced** | AC modes, filters, bridge and intermediate engineering modes. |
+| **Pro** | Complex analysis, RLC, phasors, sweep, tolerance, sensitivity, Monte Carlo, harmonics, and three‑phase. |
 
-Такое деление делает приложение одновременно пригодным и для быстрых учебных задач, и для более глубокого инженерного анализа.
+This split makes the app suitable both for quick educational tasks and deeper engineering analysis.
 
 ---
 
-## Поддерживаемые инженерные режимы
+## Supported engineering modes
 
-Ниже перечислены основные группы режимов, которые входят в финальную Ultimate-версию.
+Below are the main mode groups in the final Ultimate version.
 
 ### 1. Basic
 
-Используются для базовых расчётов и резистивных цепей.
+Used for basic calculations and resistive circuits.
 
-#### Что включает
+#### Includes
 
-- Закон Ома
-- Мощность
-- Энергия
-- Сопротивление проводника
-- Делитель напряжения
+- Ohm’s law
+- Power
+- Energy
+- Conductor resistance
+- Voltage divider
 
-#### Что можно получить
+#### Can compute
 
-- Напряжение, ток, сопротивление
-- Мощность рассеяния
-- Накопленную энергию за время
-- Оценку сопротивления по длине, материалу и площади сечения
-- Выходное напряжение делителя
+- Voltage, current, resistance
+- Power dissipation
+- Stored energy over time
+- Resistance by length, material, and cross-section area
+- Divider output voltage
 
 ### 2. Advanced
 
-Используются для AC-анализа, фильтров и промежуточных инженерных расчётов.
+Used for AC analysis, filters, and mid-level engineering tasks.
 
-#### Что включает
+#### Includes
 
-- Реактивные сопротивления
+- Reactive impedances
 - AC power
-- RC low-pass
-- RL high-pass
-- Постоянные времени
-- Мостовые схемы
+- RC low‑pass
+- RL high‑pass
+- Time constants
+- Bridge circuits
 
-#### Что можно получить
+#### Can compute
 
 - XL
 - XC
 - P, Q, S
-- Частоты среза
-- Постоянные времени
-- Sweep-графики и таблицы для фильтров и мостовых зависимостей
+- Cutoff frequencies
+- Time constants
+- Sweep charts and tables for filters and bridges
 
 ### 3. Pro
 
-Это наиболее насыщенная инженерная группа финальной версии.
+The most feature-rich engineering group in the final version.
 
-#### Что включает
+#### Includes
 
-- Комплексный импеданс
-- Комплексную мощность
-- RLC-анализ
-- Фазоры и волновые формы
-- Sweep-режимы
+- Complex impedance
+- Complex power
+- RLC analysis
+- Phasors and waveforms
+- Sweep modes
 - Tolerance
 - Sensitivity
 - Monte Carlo
 - Harmonics / THD
-- Three-phase
+- Three‑phase
 
-#### Что можно анализировать
+#### Can analyze
 
-- комплексную форму электрических величин;
-- фазовый угол;
-- мнимую и действительную составляющую;
-- поведение RLC возле резонанса;
-- чувствительность результата к изменению параметров;
-- разброс параметров;
-- гармонический состав;
-- базовые трёхфазные расчёты.
+- complex form of electrical quantities;
+- phase angle;
+- real and imaginary parts;
+- RLC behavior near resonance;
+- sensitivity to parameter variations;
+- parameter spread;
+- harmonic content;
+- basic three‑phase calculations.
 
 ---
 
-## Математическая модель
+## Mathematical model
 
-Ниже перечислены основные формулы, на которых строится приложение.
+Key formulas used in the app.
 
-### Закон Ома
+### Ohm’s law
 
 - U = I * R
 - I = U / R
 - R = U / I
 
-### Электрическая мощность
+### Electric power
 
 - P = U * I
-- P = I^2 * R
-- P = U^2 / R
+- P = I² * R
+- P = U² / R
 
-### Энергия
+### Energy
 
 - E = P * t
 
-### Сопротивление проводника
+### Conductor resistance
 
 - R = rho * L / S
 
-где:
+where:
 
-- R — сопротивление;
-- rho — удельное сопротивление материала;
-- L — длина проводника;
-- S — площадь поперечного сечения.
+- R — resistance
+- rho — material resistivity
+- L — conductor length
+- S — cross-sectional area
 
-### Делитель напряжения
+### Voltage divider
 
 - Uout = Uin * R2 / (R1 + R2)
 
-### Индуктивное сопротивление
+### Inductive reactance
 
 - XL = 2 * pi * f * L
 
-### Ёмкостное сопротивление
+### Capacitive reactance
 
 - XC = 1 / (2 * pi * f * C)
 
-### Комплексный импеданс
+### Complex impedance
 
-Общий вид:
+General:
 
 - Z = R + jX
 
-Для последовательной RLC-цепи:
+For a series RLC circuit:
 
-- Z = R + j(XL - XC)
+- Z = R + j (XL − XC)
 
-### Модуль импеданса
+### Magnitude of impedance
 
-- |Z| = sqrt(R^2 + X^2)
+- |Z| = sqrt(R² + X²)
 
-### Фазовый угол
+### Phase angle
 
 - phi = arctan(X / R)
 
-### Комплексная мощность
+### Complex power
 
 - S_complex = P + jQ
 - S = U * I
 - P = U * I * cos(phi)
 - Q = U * I * sin(phi)
 
-### Частота среза
+### Cutoff frequency
 
-Для RC:
+For RC:
 
 - fc = 1 / (2 * pi * R * C)
 
-Для RL используются эквивалентные зависимости частоты от R и L.
+For RL, equivalent formulas in terms of R and L are used.
 
-### Постоянная времени
+### Time constant
 
-Для RC:
+For RC:
 
 - tau = R * C
 
-Для RL:
+For RL:
 
 - tau = L / R
 
-### Резонансная частота
+### Resonant frequency
 
 - f0 = 1 / (2 * pi * sqrt(L * C))
 
 ---
 
-## Форматы представления результатов
+## Result formats
 
-Одно из главных достоинств приложения — многоформатное представление результатов.
+One of the main strengths of the app is multi-format representation of results.
 
-### 1. Скалярное представление
+### 1. Scalar form
 
-Используется для простых DC-величин и производных параметров.
+Used for simple DC quantities and derived values.
 
-Примеры:
+Examples:
 
 - R = 220 Ohm
 - I = 0.05 A
 - P = 0.55 W
 
-### 2. Комплексное представление
+### 2. Complex form
 
-Используется для AC-режимов и импедансных моделей.
+Used for AC and impedance models.
 
-Пример:
+Example:
 
 `Z = 10 + j15 Ohm`
 
-### 3. Полярное представление
+### 3. Polar form
 
-Используется, когда важно показать модуль и угол.
+Used when magnitude and angle are important.
 
-Пример:
+Example:
 
 `Z = 18.03 angle 56.31 deg Ohm`
 
-### 4. Табличное представление
+### 4. Tabular form
 
-Применяется в sweep-режимах и представляет собой набор точек.
+Used in sweep modes as a set of points.
 
-| Параметр | Значение 1 | Значение 2 | ... |
+| Parameter | Value 1 | Value 2 | ... |
 |---|---:|---:|---:|
-| Частота | ... | ... | ... |
-| Амплитуда | ... | ... | ... |
-| Фаза | ... | ... | ... |
+| Frequency | ... | ... | ... |
+| Amplitude | ... | ... | ... |
+| Phase | ... | ... | ... |
 
-### 5. Графическое представление
+### 5. Graphical form
 
-Используется для визуального отображения изменения величин во времени, по частоте или по другому варьируемому параметру.
-
----
-
-## Sweep-режимы и табличный анализ
-
-Sweep-режимы — одна из важнейших функций приложения. Вместо вычисления одной точки пользователь задаёт диапазон изменения параметра, после чего приложение строит набор последовательных расчётов.
-
-### Что можно sweep’ить
-
-В зависимости от раздела это может быть:
-
-- частота;
-- сопротивление;
-- ёмкость;
-- индуктивность;
-- время;
-- фазовый угол;
-- другое управляющее значение.
-
-### Что получается в результате
-
-- набор дискретных точек;
-- таблица значений;
-- графическая кривая;
-- возможность выгрузки в CSV.
-
-### Зачем это нужно
-
-Sweep позволяет увидеть:
-
-- области резонанса;
-- характер изменения импеданса;
-- поведение фильтра;
-- чувствительность результата к параметру;
-- точки перегиба и критические зоны.
+Used to visualize how a quantity changes over time, frequency, or another swept parameter.
 
 ---
 
-## Графики и визуализация
+## Sweep modes and tabular analysis
 
-Приложение использует графики как основной инструмент понимания электрических зависимостей.
+Sweep modes are one of the most important features. Instead of computing a single point, the user specifies a parameter range and the app builds a sequence of calculations.
 
-### Типы визуализаций
+### What can be swept
 
-В зависимости от раздела возможны:
+Depending on the mode:
 
-- графики временных зависимостей;
-- графики частотного отклика;
-- sweep-кривые;
-- кривые модуля и фазы;
-- сравнительные инженерные кривые.
+- frequency;
+- resistance;
+- capacitance;
+- inductance;
+- time;
+- phase angle;
+- another control variable.
 
-### Что дают графики
+### Outputs
 
-График позволяет увидеть то, что плохо видно по одиночным числам:
+- a set of discrete points;
+- a value table;
+- a curve on a chart;
+- an option to export to CSV.
 
-- рост или спад;
-- окрестность резонанса;
-- фазовый сдвиг;
-- чувствительность схемы к изменению параметров;
-- поведение величины на диапазоне, а не в одной точке.
+### Why it matters
 
----
+Sweep modes reveal:
 
-## Экспорт данных
-
-Приложение поддерживает экспорт текущей sweep-таблицы в CSV.
-
-### Для чего это полезно
-
-CSV можно использовать для:
-
-- импорта в Excel;
-- работы в Google Sheets;
-- построения дополнительных графиков;
-- анализа в Python / MATLAB / Octave;
-- оформления лабораторных и отчётов.
-
-### Типовой сценарий
-
-1. Выбрать режим.
-2. Задать sweep.
-3. Получить таблицу.
-4. Нажать экспорт.
-5. Получить CSV-файл с текущими данными.
+- resonance regions;
+- impedance trends;
+- filter behavior;
+- sensitivity of results to parameters;
+- inflection points and critical zones.
 
 ---
 
-## Типовые сценарии использования
+## Charts and visualization
 
-Ниже приведены характерные сценарии работы.
+Charts are a primary tool for understanding electrical relationships.
 
-### Сценарий 1. Быстрая проверка задачи
+### Visualization types
 
-Пользователь знает исходные параметры цепи и хочет быстро проверить результат без ручного пересчёта.
+Depending on the mode:
 
-Подходит для:
+- time-domain plots;
+- frequency response;
+- sweep curves;
+- magnitude/phase plots;
+- comparative engineering curves.
 
-- закона Ома;
-- мощности;
-- делителя;
-- RC/RL-параметров.
+### What charts reveal
 
-### Сценарий 2. Исследование поведения фильтра
+Charts show what individual numbers hide:
 
-Пользователь меняет частоту и наблюдает, как ведёт себя цепь.
+- growth or decay;
+- resonance behavior;
+- phase shift;
+- sensitivity to parameter changes;
+- how a quantity behaves over a range rather than at one point.
 
-Подходит для:
+---
 
-- RC low-pass;
-- RL high-pass;
-- импедансных зависимостей.
+## Data export
 
-### Сценарий 3. Анализ комплексного импеданса
+The app can export the current sweep table to CSV.
 
-Пользователь хочет увидеть электрическую величину и как сумму действительной и мнимой части, и как модуль с углом.
+### Why it is useful
 
-Подходит для:
+CSV can be used for:
 
-- AC-анализа;
-- RLC-цепей;
-- фазоров.
+- importing into Excel;
+- Google Sheets;
+- building additional plots;
+- analysis in Python / MATLAB / Octave;
+- lab reports and documentation.
 
-### Сценарий 4. Подготовка к отчёту или лабораторной
+### Typical workflow
 
-Пользователь строит sweep-таблицу и выгружает данные для дальнейшей обработки.
+1. Select a mode.
+2. Configure the sweep.
+3. Generate the table.
+4. Click export.
+5. Get a CSV file with the current data.
 
-### Сценарий 5. Анализ разброса и чувствительности
+---
 
-Пользователь хочет понять, насколько результат зависит от допуска или изменения одного из параметров.
+## Typical usage scenarios
 
-Подходит для:
+Some representative usage patterns.
+
+### Scenario 1. Quick check of a problem
+
+The user knows the circuit parameters and wants to quickly check a result.
+
+Good for:
+
+- Ohm’s law;
+- power;
+- dividers;
+- RC/RL parameters.
+
+### Scenario 2. Exploring filter behavior
+
+The user changes frequency and observes the circuit response.
+
+Good for:
+
+- RC low‑pass;
+- RL high‑pass;
+- impedance vs frequency.
+
+### Scenario 3. Complex impedance analysis
+
+The user wants to see a quantity both as rectangular and polar form.
+
+Good for:
+
+- AC analysis;
+- RLC circuits;
+- phasors.
+
+### Scenario 4. Preparing a report or lab work
+
+The user builds a sweep table and exports data for further processing.
+
+### Scenario 5. Spread and sensitivity analysis
+
+The user wants to see how sensitive a result is to tolerance or parameter changes.
+
+Good for:
 
 - tolerance;
 - sensitivity;
 - Monte Carlo.
 
-### Сценарий 6. Учебная демонстрация
+### Scenario 6. Teaching demonstration
 
-Преподаватель или студент объясняет, как частота влияет на реактивное сопротивление, резонанс, фазовый угол или форму отклика.
-
----
-
-## Практическая ценность
-
-Приложение полезно не только как учебный инструмент, но и как способ быстро получить инженерную интуицию. Приложение полезно для:
-
-- при обучении;
-- при проверке гипотез;
-- при подборе номиналов;
-- при объяснении электрических эффектов;
-- при быстрых инженерных оценках без запуска тяжёлых CAD/CAE-инструментов.
+An instructor or student explains how frequency affects reactance, resonance, phase, or response shape.
 
 ---
 
-## Как открыть и использовать
+## Practical value
 
-### Локальный запуск
+The app is useful not only as a teaching tool but also as a quick way to build engineering intuition. It is especially handy for:
 
-Приложение выполнено как единый HTML-файл.
-
-Чтобы начать работу:
-
-1. Сохраните HTML-файл.
-2. Откройте его в современном браузере.
-3. Выберите нужную группу режимов в sidebar.
-4. Выберите конкретный submode.
-5. Введите параметры.
-6. Изучите результаты, графики и таблицы.
-7. При необходимости экспортируйте CSV.
-
-### Совместимые сценарии
-
-Приложение особенно удобно для:
-
-- локального использования без интернета;
-- демонстраций;
-- быстрого расчёта “на месте”;
-- хранения в репозитории как portable-инструмента.
+- learning;
+- hypothesis checking;
+- selecting component values;
+- explaining electrical effects;
+- rapid engineering estimates without heavy CAD/CAE tools.
 
 ---
 
-## Cтруктура репозитория
+## How to run and use
 
-Вид репозитория (Under construction):
+### Local run
+
+The app is a single HTML file.
+
+To start:
+
+1. Save the HTML file.
+2. Open it in a modern browser.
+3. Choose the desired mode group in the sidebar.
+4. Select a specific submode.
+5. Enter parameters.
+6. Inspect results, charts, and tables.
+7. Export CSV if needed.
+
+### Where it fits well
+
+The app is especially convenient for:
+
+- offline local use;
+- demos;
+- quick on‑site calculations;
+- storing in a repository as a portable tool.
+
+---
+
+## Repository structure
+
+Repository layout (under construction):
 
 ```text
 project-root/
@@ -649,45 +650,46 @@ project-root/
 ```
 ---
 
-## Ограничения
-Несмотря на широкий набор режимов, приложение не является полной заменой профессиональных систем моделирования.
-### Текущие ограничения
--	Это не SPICE-симулятор.
--	Нет численного моделирования сложных нелинейных схем.
--	Нет полноценной интерактивной схемотехнической среды.
--	Нет сохранения множества сценариев как отдельных проектов.
--	Нет symbolic algebra engine уровня CAS-систем.
--	Нет полноценной нелинейной симуляции сложных электронных устройств.
+## Limitations
+Despite the wide feature set, the app is not a full replacement for professional simulators.
+### Current limitations
+-	Not a SPICE simulator.
+-	No numerical simulation of complex nonlinear circuits.
+-	No full interactive schematic editor.
+-	No multi-project scenario storage.
+-	No CAS-level symbolic algebra engine.
+-	No full nonlinear device simulation.
 
-Что это означает на практике
-Приложение идеально подходит для анализа типовых зависимостей, вариационного инженерного анализа и визуализации, но не претендует на роль полного пакета для проектирования сложных электронных устройств.
+What this means in practice:
+The app is ideal for typical dependencies, variation analysis, and visualization, but it is not meant to be a complete electronic design environment.
+
 ---
 
 ## FAQ
 
-### Что это: сайт, калькулятор или инженерный инструмент?
+### What is this: a website, a calculator, or an engineering tool?
 
-Это инженерный HTML-визуализатор с функциями калькулятора, графического анализатора, sweep-экспортера и исследовательского мини-стенда.
+It is an engineering HTML visualizer with calculator functions, charting, sweep export, and a small research workbench.
 
-### Это финальная версия?
+### Is this the final version?
 
-Да. Этот README описывает именно финальную Ultimate-сборку: единый HTML-файл с полным набором режимов и финальной объединённой структурой интерфейса.
+Yes. This README describes the final Ultimate build: a single HTML file with the full set of modes and the unified interface.
 
-### Нужен ли сервер для запуска?
+### Do I need a server to run it?
 
-Нет. Приложение открывается локально как обычный HTML-файл.
+No. It runs locally as a regular HTML file.
 
-### Подходит ли это для обучения?
+### Is it suitable for learning?
 
-Да. Более того, приложение особенно полезно именно для обучения, потому что показывает связи между формулой, числом, фазой, графиком и sweep-таблицей.
+Yes. It is particularly useful for education because it links formulas, numbers, phase, charts, and sweep tables.
 
-### Это заменяет SPICE?
+### Does it replace SPICE?
 
-Нет. Это не полноценный симулятор схем, а компактный визуально-расчётный инструмент.
+No. It is not a full circuit simulator, but a compact visual and computational tool.
 
-### Можно ли использовать результаты во внешних программах?
+### Can results be used in external tools?
 
-Да. Для этого предусмотрен экспорт sweep-данных в CSV.
+Yes. Sweep data can be exported to CSV.
 
 ## License
 
