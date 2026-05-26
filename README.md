@@ -1,28 +1,27 @@
 # Electrical Parameters Visualizer v3
 
-<!-- Core project info -->
-![Project](https://img.shields.io/badge/project-Electro%20Visualizer%20V3-01696f?style=for-the-badge)
-![Status](https://img.shields.io/badge/status-alpha-f59e0b?style=for-the-badge)
-![Platform](https://img.shields.io/badge/platform-browser-1f6feb?style=for-the-badge)
-![Form](https://img.shields.io/badge/form-single--file_HTML-0a7ea4?style=for-the-badge)
+<!-- Core -->
+![Project](https://img.shields.io/badge/project-Electro%20Visualizer%20V3-01696f)
+![Status](https://img.shields.io/badge/status-alpha-f59e0b)
+![Platform](https://img.shields.io/badge/platform-browser-1f6feb)
+![Form](https://img.shields.io/badge/form-single--file_HTML-0a7ea4)
 
-<!-- Tech stack -->
-![Stack](https://img.shields.io/badge/stack-HTML%20%7C%20CSS%20%7C%20JS-7c3aed?style=for-the-badge)
-![Charts](https://img.shields.io/badge/charts-Chart.js-ff6384?style=for-the-badge)
-![Theme](https://img.shields.io/badge/ui-DC%2FAC%20visualizer-22c55e?style=for-the-badge)
+<!-- Tech -->
+![Stack](https://img.shields.io/badge/stack-HTML%20%7C%20CSS%20%7C%20JS-7c3aed)
+![Charts](https://img.shields.io/badge/charts-Chart.js-ff6384)
 
 <!-- Domain / features -->
-![Domain](https://img.shields.io/badge/domain-electrical%20engineering-0f766e?style=for-the-badge)
-![Mode](https://img.shields.io/badge/modes-DC%20%7C%20AC%20%7C%20RLC%20%7C%20Phasors-2563eb?style=for-the-badge)
-![Complex](https://img.shields.io/badge/complex-numbers%20%26%20phasors-4c1d95?style=for-the-badge)
-![Filters](https://img.shields.io/badge/filters-RC%20%7C%20RL%20(first--order)-dc2626?style=for-the-badge)
-![Resonance](https://img.shields.io/badge/RLC-resonance-ef4444?style=for-the-badge)
-![Sweeps](https://img.shields.io/badge/sweep-tables%20%26%20plots-059669?style=for-the-badge)
-![Export](https://img.shields.io/badge/export-CSV-16a34a?style=for-the-badge)
+![Domain](https://img.shields.io/badge/domain-electrical%20engineering-0f766e)
+![Modes](https://img.shields.io/badge/modes-DC%2FAC%2FComplex%2FRLC-2563eb)
+![Phasors](https://img.shields.io/badge/phasors-supported-4c1d95)
+![Filters](https://img.shields.io/badge/filters-RC%20%26%20RL-dc2626)
+![Resonance](https://img.shields.io/badge/RLC-resonance-ef4444)
+![Sweeps](https://img.shields.io/badge/sweeps-tables%20%26%20plots-059669)
+![Export](https://img.shields.io/badge/export-CSV-16a34a)
 
-<!-- Meta (optional) -->
-![Language](https://img.shields.io/badge/docs-RU%20%7C%20EN-6b7280?style=for-the-badge)
-![Offline](https://img.shields.io/badge/offline-supported-334155?style=for-the-badge)
+<!-- Meta -->
+![Docs](https://img.shields.io/badge/docs-RU%20%7C%20EN-6b7280)
+![Offline](https://img.shields.io/badge/offline-supported-334155)
 
 Electro Visualizer V3 — это одностраничная, работающая в браузере инженерная «песочница» для визуализации и вычисления типичных электрических величин — от базового закона Ома до сложного импеданса, резонанса RLC‑цепей, графиков в стиле диаграмм Боде и фазорных форм сигналов.
 Приложение выполнено в виде автономного HTML‑файла без бэкенда и сборки: достаточно открыть его в любом современном браузере, и вы получите интерактивный интерфейс с разделами для DC/AC‑расчётов, комплексных чисел, RLC‑цепей, фильтров первого порядка и резистивных делителей, каждый из которых имеет собственную панель ввода, карточки результатов, sweep‑таблицы и графики на базе Chart.js.
