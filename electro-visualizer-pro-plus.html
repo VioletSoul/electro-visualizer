@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>electro-visualizer-pro-plus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    :root,[data-theme="light"]{--text-xs:clamp(.75rem,.7rem + .25vw,.875rem);--text-sm:clamp(.875rem,.8rem + .35vw,1rem);--text-base:clamp(1rem,.95rem + .25vw,1.125rem);--text-lg:clamp(1.125rem,1rem + .75vw,1.5rem);--text-xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);--space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;--space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;--space-12:3rem;--space-16:4rem;--color-bg:#f7f6f2;--color-surface:#f9f8f5;--color-surface-2:#fbfbf9;--color-surface-offset:#f3f0ec;--color-border:#d4d1ca;--color-divider:#dcd9d5;--color-text:#28251d;--color-text-muted:#6d6b66;--color-text-faint:#a6a39e;--color-text-inverse:#f9f8f4;--color-primary:#01696f;--color-primary-hover:#0c4e54;--color-blue:#006494;--color-orange:#da7101;--color-gold:#d19900;--color-success:#437a22;--color-error:#a12c7b;--radius-sm:.375rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--radius-full:9999px;--shadow-sm:0 1px 2px rgba(20,20,20,.06);--shadow-md:0 10px 24px rgba(20,20,20,.08);--shadow-lg:0 18px 40px rgba(20,20,20,.12);--font-body:'Inter',system-ui,sans-serif;--font-display:'Inter',system-ui,sans-serif}
+    [data-theme="dark"]{--color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;--color-surface-offset:#22211f;--color-border:#393836;--color-divider:#262523;--color-text:#e1dfdb;--color-text-muted:#a5a29b;--color-text-faint:#6f6c66;--color-text-inverse:#171614;--color-primary:#4f98a3;--color-primary-hover:#63aab5;--color-blue:#74a8d6;--color-orange:#fdab43;--color-gold:#e8af34;--color-success:#7ab856;--color-error:#dd78b6;--shadow-sm:0 1px 2px rgba(0,0,0,.2);--shadow-md:0 10px 24px rgba(0,0,0,.3)}
+    *{box-sizing:border-box;margin:0;padding:0} html,body{min-height:100%} body{font-family:var(--font-body);font-size:var(--text-base);line-height:1.55;background:var(--color-bg);color:var(--color-text)} button,input,select{font:inherit;color:inherit} button{cursor:pointer;border:none;background:none}
+    .app{display:grid;grid-template-columns:290px 1fr;min-height:100vh}
+    .sidebar{background:var(--color-surface);border-right:1px solid var(--color-border);padding:var(--space-5);display:flex;flex-direction:column;gap:var(--space-5);position:sticky;top:0;height:100vh;overflow:auto}
+    .sidebar-top{display:grid;gap:var(--space-4);position:sticky;top:0;z-index:4;background:var(--color-surface);padding-bottom:var(--space-2)}
+    .brand{display:flex;gap:var(--space-3);align-items:center}.logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--color-primary),var(--color-blue));display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-md)} .logo svg{width:21px;height:21px}
+    .brand h1{font-size:1.08rem;line-height:1.02;font-weight:750;letter-spacing:-.02em}.brand p{font-size:.9rem;color:var(--color-text-muted);margin-top:4px;line-height:1.35}
+    .sidebar-footer{display:grid;gap:var(--space-2);padding-top:var(--space-3);border-top:1px solid var(--color-divider)} .toggle,.action-btn{min-height:42px;padding:10px 12px;border-radius:12px;border:1px solid var(--color-border);background:var(--color-surface-2);font-size:.92rem;font-weight:600}
+    #nav{display:grid;gap:var(--space-4);padding-top:var(--space-2)} .nav-section{display:grid;gap:10px}.group-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--color-text-faint);font-weight:700;padding-left:2px}.nav-group{display:grid;gap:8px}
+    .nav-group button{padding:10px 12px;border-radius:13px;text-align:left;border:1px solid transparent;transition:.18s ease} .nav-group button:hover{background:rgba(255,255,255,.02);border-color:var(--color-border)}
+    .nav-group button strong{display:block;font-size:.965rem;font-weight:650;line-height:1.28;letter-spacing:-.01em}.nav-group small{display:block;color:var(--color-text-muted);font-size:.82rem;line-height:1.45;margin-top:5px;font-weight:450}
+    .nav-group button.active{background:color-mix(in srgb,var(--color-primary) 10%,var(--color-surface-offset));border-color:color-mix(in srgb,var(--color-primary) 26%,var(--color-border));box-shadow:var(--shadow-sm)}
+    .main{padding:var(--space-6);display:grid;gap:var(--space-6)} .hero{display:flex;justify-content:space-between;gap:var(--space-6);align-items:flex-start;flex-wrap:wrap}.hero h2{font-size:var(--text-xl);max-width:20ch;line-height:1.05}.hero p{max-width:74ch;color:var(--color-text-muted);margin-top:var(--space-3)}
+    .status-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-4)} .stat,.panel{background:var(--color-surface);border:1px solid var(--color-border);box-shadow:var(--shadow-sm)} .stat{border-radius:18px;padding:var(--space-4)} .stat .label{font-size:var(--text-xs);color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.08em}.stat .value{font-size:1.16rem;font-weight:800;margin-top:10px}
+    .panel{border-radius:22px;padding:var(--space-5)} .panel h3{font-size:1.05rem;margin-bottom:var(--space-4)} .layout{display:grid;grid-template-columns:1.05fr .95fr;gap:var(--space-6)} .grid-2,.grid-3{display:grid;gap:var(--space-4)} .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))} .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .field{display:grid;gap:8px}.field label{font-size:var(--text-sm);font-weight:600}.field input,.field select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--color-border);background:var(--color-surface-2);min-height:44px}.field .hint{font-size:var(--text-xs);color:var(--color-text-muted)}
+    .actions{display:flex;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-4)} .btn-primary,.btn-secondary{min-height:44px;padding:12px 16px;border-radius:12px;font-weight:700}.btn-primary{background:var(--color-primary);color:var(--color-text-inverse)}.btn-primary:hover{background:var(--color-primary-hover)}.btn-secondary{background:var(--color-surface-offset);border:1px solid var(--color-border)}
+    .chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:var(--space-4)} .chip{padding:10px 12px;border-radius:999px;border:1px solid var(--color-border);background:var(--color-surface-2);font-size:var(--text-sm);min-height:44px}.chip.active{background:var(--color-primary);color:var(--color-text-inverse);border-color:transparent}
+    .results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-4)} .card{padding:var(--space-4);border-radius:18px;background:var(--color-surface-2);border:1px solid var(--color-border)} .card .k{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted)} .card .v{font-size:1.08rem;font-weight:800;margin-top:10px}
+    .equation{padding:14px;border-radius:14px;background:var(--color-surface-offset);border:1px solid var(--color-border);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--text-sm);overflow:auto;white-space:pre-wrap}
+    .chart-wrap{height:390px} canvas{width:100% !important;height:100% !important} table{width:100%;border-collapse:collapse;font-size:var(--text-sm)} th,td{padding:10px 8px;border-bottom:1px solid var(--color-divider);text-align:left;vertical-align:top} th{color:var(--color-text-muted);font-weight:600}
+    .foot{color:var(--color-text-muted);font-size:var(--text-sm)} .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    @media (max-width:1160px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--color-border);overflow:visible}.sidebar-top{position:static;padding-bottom:0}.layout{grid-template-columns:1fr}.status-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:720px){.grid-2,.grid-3,.results,.status-strip{grid-template-columns:1fr}.main{padding:var(--space-4)}.sidebar{padding:var(--space-4)}.hero h2{max-width:none}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h4l2-8 4 12 2-6h4" /></svg></div>
+        <div><h1>Electro Visualizer Pro+</h1><p>Допуски, чувствительность, Monte Carlo, quality</p></div>
+      </div>
+      <div class="sidebar-footer">
+        <button class="toggle" id="themeToggle">Переключить тему</button>
+        <button class="action-btn" id="resetAll">Сбросить активный режим</button>
+      </div>
+    </div>
+    <div id="nav"></div>
+  </aside>
+  <main class="main">
+    <section class="hero">
+      <div>
+        <h2 id="sectionTitle">Pro+ engineering workspace</h2>
+        <p id="sectionDescription">Расширенный набор режимов для инженерного анализа: допуски компонентов, оценка чувствительности, Monte Carlo, гармоники и трёхфазные расчёты.</p>
+      </div>
+      <div class="equation" id="equationBox">Δy/y ≈ Σ(Sx · Δx/x)</div>
+    </section>
+
+    <section class="status-strip">
+      <div class="stat"><div class="label">Режим</div><div class="value" id="activeModeLabel">—</div></div>
+      <div class="stat"><div class="label">Ключевой итог</div><div class="value" id="headlineMetric">—</div></div>
+      <div class="stat"><div class="label">Чувствительность / PF</div><div class="value" id="phaseMetric">—</div></div>
+      <div class="stat"><div class="label">Sweep / Samples</div><div class="value" id="sweepMetric">—</div></div>
+    </section>
+
+    <section class="layout">
+      <div class="panel">
+        <h3>Параметры</h3>
+        <div class="chips" id="submodeChips"></div>
+        <div class="grid-2" id="fields"></div>
+        <div class="actions">
+          <button class="btn-primary" id="calculateBtn">Посчитать и обновить</button>
+          <button class="btn-secondary" id="exportCsvBtn">Скачать CSV</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Результаты</h3>
+        <div class="results" id="results"></div>
+        <div style="margin-top: var(--space-4);" class="equation mono" id="complexView"></div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <div class="panel">
+        <h3 id="chartTitle">График</h3>
+        <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3>Таблица / распределение</h3>
+        <div style="overflow:auto;max-height:420px">
+          <table>
+            <thead><tr id="tableHead"></tr></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>Подсказка</h3>
+      <p class="foot" id="footnote">Pro+ ориентирован на инженерные сценарии: сравнение вариантов, анализ разброса и проверку устойчивости результата к изменению параметров.</p>
+    </section>
+  </main>
+</div>
+<script>
+const MODE_GROUPS = {
+  'Core Pro+': ['tolerance','sensitivity'],
+  'Simulation': ['montecarlo','rlcplus'],
+  'Power Quality': ['harmonics','threephase']
+};
+
+const appState = {
+  section:'tolerance',
+  submode:null,
+  chart:null,
+  currentSweep:[],
+  sections:{
+    tolerance:{
+      title:'Допуски компонентов',
+      description:'Worst-case и коридор разброса для делителя и выходного напряжения.',
+      equation:'Uout = Uin·R2/(R1+R2)',
+      foot:'Режим показывает, как допуски R1 и R2 смещают номинальный результат и диапазон выхода.',
+      submodes:{
+        dividerTol:{name:'Divider tolerance',fields:[
+          {key:'Uin',label:'Uin (В)',value:12},
+          {key:'R1',label:'R1 (Ом)',value:2200},
+          {key:'R2',label:'R2 (Ом)',value:1000},
+          {key:'tol1',label:'Допуск R1 (%)',value:1},
+          {key:'tol2',label:'Допуск R2 (%)',value:1},
+          {key:'points',label:'Точек sweep',value:121}
+        ],compute:(v)=>computeTolerance(v)}
+      }
+    },
+    sensitivity:{
+      title:'Чувствительность',
+      description:'Нормированная чувствительность f0, Q и |Z| к изменению R, L, C.',
+      equation:'Sx = (∂y/∂x)·(x/y)',
+      foot:'Если |Sx| велико, параметр особенно критичен для стабильности конструкции.',
+      submodes:{
+        rlcSensitivity:{name:'RLC sensitivity',fields:[
+          {key:'R',label:'R (Ом)',value:22},
+          {key:'L',label:'L (Гн)',value:0.05},
+          {key:'C',label:'C (Ф)',value:0.000001},
+          {key:'f',label:'Частота (Гц)',value:1000},
+          {key:'delta',label:'Шаг анализа (%)',value:1},
+          {key:'points',label:'Точек sweep',value:61}
+        ],compute:(v)=>computeSensitivity(v)}
+      }
+    },
+    montecarlo:{
+      title:'Monte Carlo',
+      description:'Статистический разброс резонанса и добротности RLC по допускам.',
+      equation:'x = x0·(1 + ε)',
+      foot:'Monte Carlo полезен, когда номинальная формула уже не даёт ощущения реальной устойчивости схемы.',
+      submodes:{
+        rlcMonte:{name:'RLC Monte Carlo',fields:[
+          {key:'R',label:'R (Ом)',value:22},
+          {key:'L',label:'L (Гн)',value:0.05},
+          {key:'C',label:'C (Ф)',value:0.000001},
+          {key:'tolR',label:'Допуск R (%)',value:5},
+          {key:'tolL',label:'Допуск L (%)',value:5},
+          {key:'tolC',label:'Допуск C (%)',value:10},
+          {key:'samples',label:'Сэмплов',value:500}
+        ],compute:(v)=>computeMonteCarlo(v)}
+      }
+    },
+    rlcplus:{
+      title:'RLC Pro+',
+      description:'Расширенный RLC-анализ с bandwidth, peak current и отклонением от резонанса.',
+      equation:'f0 = 1/(2π√LC), Q = (1/R)√(L/C)',
+      foot:'Подходит для оценки не только резонанса, но и практического поведения вокруг рабочей частоты.',
+      submodes:{
+        seriesPlus:{name:'Series RLC+',fields:[
+          {key:'U',label:'U (В)',value:10},
+          {key:'R',label:'R (Ом)',value:22},
+          {key:'L',label:'L (Гн)',value:0.05},
+          {key:'C',label:'C (Ф)',value:0.000001},
+          {key:'freqStart',label:'f старт',value:10},
+          {key:'freqEnd',label:'f конец',value:50000},
+          {key:'points',label:'Точек sweep',value:161}
+        ],compute:(v)=>computeRLCPlus(v)}
+      }
+    },
+    harmonics:{
+      title:'Гармоники и THD',
+      description:'Быстрый анализ гармоник тока и оценка THD / crest factor.',
+      equation:'THD = √(ΣIₙ², n≥2) / I₁',
+      foot:'Упрощённый quality-режим для нелинейной нагрузки и первичной оценки формы тока.',
+      submodes:{
+        currentTHD:{name:'Current THD',fields:[
+          {key:'I1',label:'I1, основная (А)',value:10},
+          {key:'I3',label:'I3 (А)',value:2.1},
+          {key:'I5',label:'I5 (А)',value:1.4},
+          {key:'I7',label:'I7 (А)',value:0.8},
+          {key:'I9',label:'I9 (А)',value:0.4},
+          {key:'points',label:'Гармоник на графике',value:9}
+        ],compute:(v)=>computeHarmonics(v)}
+      }
+    },
+    threephase:{
+      title:'Трёхфазный режим',
+      description:'Балансная 3φ-модель: мощность, PF, линейные и фазные величины.',
+      equation:'P = √3·U_L·I_L·cosφ',
+      foot:'Быстрый трёхфазный расчёт удобен как инженерная надстройка над AC-модулями.',
+      submodes:{
+        balanced:{name:'Balanced 3φ',fields:[
+          {key:'UL',label:'Uline (В)',value:400},
+          {key:'IL',label:'Iline (А)',value:16},
+          {key:'phi',label:'φ (град)',value:25},
+          {key:'eta',label:'КПД η (%)',value:92},
+          {key:'varStart',label:'Sweep старт φ',value:0},
+          {key:'varEnd',label:'Sweep конец φ',value:80},
+          {key:'points',label:'Точек sweep',value:121}
+        ],compute:(v)=>computeThreePhase(v)}
+      }
+    }
+  }
+};
+
+function fmt(n){if(!isFinite(n)) return '—'; const a=Math.abs(n); if(a>=1000 || (a>0 && a<0.001)) return n.toExponential(3); return Number(n).toFixed(4).replace(/\.0+$|(?<=\.[0-9]*[1-9])0+$/,'');}
+function rad(d){return d*Math.PI/180}
+function deg(r){return r*180/Math.PI}
+function getCSS(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim()}
+function buildLinearSweep(start,end,points){const arr=[];const p=Math.max(3,Math.round(points||121)); if(start===end){for(let i=0;i<p;i++)arr.push(start);return arr;} for(let i=0;i<p;i++)arr.push(start+(end-start)*i/(p-1)); return arr;}
+function buildLogSweep(start,end,points){const s=Math.max(start,1e-9),e=Math.max(end,s*1.0001),p=Math.max(3,Math.round(points||121));const arr=[];const ls=Math.log10(s),le=Math.log10(e);for(let i=0;i<p;i++)arr.push(10**(ls+(le-ls)*i/(p-1)));return arr;}
+function mean(arr){return arr.reduce((a,b)=>a+b,0)/arr.length}
+function std(arr){const m=mean(arr); return Math.sqrt(mean(arr.map(v=>(v-m)**2)))}
+function percentile(arr,p){const a=[...arr].sort((x,y)=>x-y); const i=(a.length-1)*p; const lo=Math.floor(i), hi=Math.ceil(i); if(lo===hi) return a[lo]; return a[lo]+(a[hi]-a[lo])*(i-lo)}
+function randUniformTol(tol){return (Math.random()*2-1)*(tol/100)}
+
+function computeTolerance(v){
+  const Uin=+v.Uin,R1=+v.R1,R2=+v.R2,tol1=+v.tol1,tol2=+v.tol2,points=Math.max(11,+v.points||121);
+  const nominal=Uin*R2/(R1+R2);
+  const rows=buildLinearSweep(-1,1,points).map(k=>{
+    const r1=R1*(1+k*tol1/100), r2min=R2*(1-tol2/100), r2max=R2*(1+tol2/100), r2nom=R2*(1+k*tol2/100);
+    return {
+      x:k*100,
+      nominal:Uin*r2nom/(r1+r2nom),
+      min:Uin*r2min/(r1+r2min),
+      max:Uin*r2max/(r1+r2max)
+    };
+  });
+  const worstMin = Uin*(R2*(1-tol2/100))/((R1*(1+tol1/100))+(R2*(1-tol2/100)));
+  const worstMax = Uin*(R2*(1+tol2/100))/((R1*(1-tol1/100))+(R2*(1+tol2/100)));
+  const spread = ((worstMax-worstMin)/nominal)*100;
+  return {
+    headline:`Uout = ${fmt(nominal)} V`,
+    phase:`Диапазон ${fmt(worstMin)}…${fmt(worstMax)} V`,
+    complex:`Номинал: ${fmt(nominal)} V\nWorst-case min: ${fmt(worstMin)} V\nWorst-case max: ${fmt(worstMax)} V\nРазброс: ${fmt(spread)} %`,
+    cards:[['Uout nom',`${fmt(nominal)} V`],['Uout min',`${fmt(worstMin)} V`],['Uout max',`${fmt(worstMax)} V`],['ΔU span',`${fmt(worstMax-worstMin)} V`],['Spread',`${fmt(spread)} %`],['Gain K',fmt(nominal/Uin)]],
+    chart:{multi:true,xlabel:'Смещение допусков, %',series:[
+      {label:'Nominal path',data:rows.map(r=>({x:r.x,y:r.nominal})),color:getCSS('--color-primary')},
+      {label:'Min envelope',data:rows.map(r=>({x:r.x,y:r.min})),color:getCSS('--color-orange')},
+      {label:'Max envelope',data:rows.map(r=>({x:r.x,y:r.max})),color:getCSS('--color-success')}
+    ]},
+    table:{head:['Shift, %','Uout nom, V','Uout min, V','Uout max, V'],rows:rows.map(r=>[fmt(r.x),fmt(r.nominal),fmt(r.min),fmt(r.max)])}
+  };
+}
+
+function computeSensitivity(v){
+  const R=+v.R,L=+v.L,C=+v.C,f=+v.f,delta=Math.max(0.1,+v.delta||1)/100,points=Math.max(11,+v.points||61);
+  const f0=1/(2*Math.PI*Math.sqrt(L*C));
+  const Q=(1/R)*Math.sqrt(L/C);
+  const w=2*Math.PI*f, X=w*L-1/(w*C), Z=Math.hypot(R,X);
+  const base={f0,Q,Z};
+  const params={R,L,C};
+  function metrics(p){const f0m=1/(2*Math.PI*Math.sqrt(p.L*p.C)); const Qm=(1/p.R)*Math.sqrt(p.L/p.C); const Xm=w*p.L-1/(w*p.C); const Zm=Math.hypot(p.R,Xm); return {f0:f0m,Q:Qm,Z:Zm};}
+  const names=['R','L','C'];
+  const sensitivities=[];
+  names.forEach(name=>{
+    const up={...params,[name]:params[name]*(1+delta)};
+    const down={...params,[name]:params[name]*(1-delta)};
+    const mu=metrics(up), md=metrics(down);
+    ['f0','Q','Z'].forEach(target=>{
+      const s=((mu[target]-md[target])/(2*delta*base[target]));
+      sensitivities.push({param:name,target,S:s});
+    });
+  });
+  const dominant=sensitivities.reduce((a,b)=>Math.abs(b.S)>Math.abs(a.S)?b:a,sensitivities[0]);
+  const rows=buildLinearSweep(-5,5,points).map(pct=>{
+    const factor=1+pct/100;
+    const q=(1/(R*factor))*Math.sqrt(L/C);
+    return {x:pct,y:q};
+  });
+  return {
+    headline:`f0 = ${fmt(f0)} Hz`,
+    phase:`Dominant: ${dominant.target}/${dominant.param} = ${fmt(dominant.S)}`,
+    complex:`Base f0 = ${fmt(f0)} Hz\nBase Q = ${fmt(Q)}\nBase |Z| = ${fmt(Z)} Ω\nMax |S| => ${dominant.target} vs ${dominant.param}: ${fmt(dominant.S)}`,
+    cards:[['f0',`${fmt(f0)} Hz`],['Q',fmt(Q)],['|Z|',`${fmt(Z)} Ω`],['S(f0,L)',fmt(sensitivities.find(x=>x.param==='L'&&x.target==='f0').S)],['S(f0,C)',fmt(sensitivities.find(x=>x.param==='C'&&x.target==='f0').S)],['S(Q,R)',fmt(sensitivities.find(x=>x.param==='R'&&x.target==='Q').S)]],
+    chart:{label:'Q vs ΔR(%)',xlabel:'ΔR, %',data:rows.map(r=>({x:r.x,y:r.y}))},
+    table:{head:['Param','Target','Sensitivity Sx'],rows:sensitivities.map(r=>[r.param,r.target,fmt(r.S)])}
+  };
+}
+
+function computeMonteCarlo(v){
+  const R=+v.R,L=+v.L,C=+v.C,tolR=+v.tolR,tolL=+v.tolL,tolC=+v.tolC,samples=Math.max(100,Math.min(3000,Math.round(+v.samples||500)));
+  const rows=[];
+  for(let i=0;i<samples;i++){
+    const r=R*(1+randUniformTol(tolR));
+    const l=L*(1+randUniformTol(tolL));
+    const c=C*(1+randUniformTol(tolC));
+    const f0=1/(2*Math.PI*Math.sqrt(l*c));
+    const Q=(1/r)*Math.sqrt(l/c);
+    rows.push({x:i+1,f0,Q,R:r,L:l,C:c});
+  }
+  const f0s=rows.map(r=>r.f0), Qs=rows.map(r=>r.Q);
+  return {
+    headline:`μf0 = ${fmt(mean(f0s))} Hz`,
+    phase:`σf0 = ${fmt(std(f0s))} Hz`,
+    complex:`Samples = ${samples}\nMean f0 = ${fmt(mean(f0s))} Hz\nP5…P95 f0 = ${fmt(percentile(f0s,.05))}…${fmt(percentile(f0s,.95))} Hz\nMean Q = ${fmt(mean(Qs))}`,
+    cards:[['Mean f0',`${fmt(mean(f0s))} Hz`],['Std f0',`${fmt(std(f0s))} Hz`],['P5 f0',`${fmt(percentile(f0s,.05))} Hz`],['P95 f0',`${fmt(percentile(f0s,.95))} Hz`],['Mean Q',fmt(mean(Qs))],['Std Q',fmt(std(Qs))]],
+    chart:{label:'f0 samples',xlabel:'Sample #',data:rows.map(r=>({x:r.x,y:r.f0}))},
+    table:{head:['Sample','f0, Hz','Q','R, Ω','L, H','C, F'],rows:rows.slice(0,300).map(r=>[r.x,fmt(r.f0),fmt(r.Q),fmt(r.R),fmt(r.L),fmt(r.C)])}
+  };
+}
+
+function computeRLCPlus(v){
+  const U=+v.U,R=+v.R,L=+v.L,C=+v.C;
+  const rows=buildLogSweep(+v.freqStart,+v.freqEnd,+v.points).map(f=>{const w=2*Math.PI*f, X=w*L-1/(w*C), Z=Math.hypot(R,X), I=U/Z; return {x:f,z:Z,i:I,db:20*Math.log10(Math.max(I,1e-12))};});
+  const peak=rows.reduce((a,b)=>b.i>a.i?b:a,rows[0]);
+  const half=peak.i/Math.sqrt(2);
+  const below=rows.filter(r=>r.x<peak.x && r.i<=half).at(-1) || rows[0];
+  const above=rows.find(r=>r.x>peak.x && r.i<=half) || rows.at(-1);
+  const bw=above.x-below.x;
+  const qApprox=peak.x/Math.max(bw,1e-9);
+  return {
+    headline:`Peak @ ${fmt(peak.x)} Hz`,
+    phase:`BW ≈ ${fmt(bw)} Hz`,
+    complex:`Peak current = ${fmt(peak.i)} A\n-3 dB band: ${fmt(below.x)}…${fmt(above.x)} Hz\nApprox Q = ${fmt(qApprox)}`,
+    cards:[['Peak f',`${fmt(peak.x)} Hz`],['Peak I',`${fmt(peak.i)} A`],['|Z| peak',`${fmt(peak.z)} Ω`],['f1',`${fmt(below.x)} Hz`],['f2',`${fmt(above.x)} Hz`],['Q approx',fmt(qApprox)]],
+    chart:{label:'I(A)',xlabel:'f, Hz',data:rows.map(r=>({x:r.x,y:r.i})),logX:true},
+    table:{head:['f, Hz','|Z|, Ω','I, A','20log10(I)'],rows:rows.map(r=>[fmt(r.x),fmt(r.z),fmt(r.i),fmt(r.db)])}
+  };
+}
+
+function computeHarmonics(v){
+  const values=[+v.I1,+v.I3,+v.I5,+v.I7,+v.I9];
+  const orders=[1,3,5,7,9];
+  const I1=values[0];
+  const thd=Math.sqrt(values.slice(1).reduce((a,b)=>a+b*b,0))/Math.max(I1,1e-9);
+  const rms=Math.sqrt(values.reduce((a,b)=>a+b*b,0));
+  const crest=Math.sqrt(2)*(rms/Math.max(I1,1e-9));
+  const rows=orders.map((n,i)=>({x:n,y:values[i]}));
+  return {
+    headline:`THD = ${fmt(thd*100)} %`,
+    phase:`Irms = ${fmt(rms)} A`,
+    complex:`I1 = ${fmt(I1)} A\nTHD = ${fmt(thd*100)} %\nIrms(total) = ${fmt(rms)} A\nCrest estimate = ${fmt(crest)}`,
+    cards:[['THD',`${fmt(thd*100)} %`],['I1',`${fmt(I1)} A`],['Irms',`${fmt(rms)} A`],['I3/I1',fmt(values[1]/Math.max(I1,1e-9))],['I5/I1',fmt(values[2]/Math.max(I1,1e-9))],['Crest',fmt(crest)]],
+    chart:{label:'In(A)',xlabel:'Номер гармоники',data:rows.map(r=>({x:r.x,y:r.y}))},
+    table:{head:['n','In, A','In/I1'],rows:rows.map(r=>[r.x,fmt(r.y),fmt(r.y/Math.max(I1,1e-9))])}
+  };
+}
+
+function computeThreePhase(v){
+  const UL=+v.UL, IL=+v.IL, phi=rad(+v.phi), eta=Math.max(1,+v.eta)/100;
+  const P=Math.sqrt(3)*UL*IL*Math.cos(phi);
+  const S=Math.sqrt(3)*UL*IL;
+  const Q=Math.sqrt(3)*UL*IL*Math.sin(phi);
+  const Uph=UL/Math.sqrt(3);
+  const Pin=P/eta;
+  const rows=buildLinearSweep(+v.varStart,+v.varEnd,+v.points).map(a=>{const ph=rad(a); return {x:a,p:Math.sqrt(3)*UL*IL*Math.cos(ph),q:Math.sqrt(3)*UL*IL*Math.sin(ph),pf:Math.cos(ph)}});
+  return {
+    headline:`P = ${fmt(P)} W`,
+    phase:`PF = ${fmt(Math.cos(phi))}`,
+    complex:`S = ${fmt(S)} VA\nP = ${fmt(P)} W\nQ = ${fmt(Q)} var\nInput with η = ${fmt(Pin)} W`,
+    cards:[['P',`${fmt(P)} W`],['Q',`${fmt(Q)} var`],['S',`${fmt(S)} VA`],['PF',fmt(Math.cos(phi))],['Uphase',`${fmt(Uph)} V`],['Pin/η',`${fmt(Pin)} W`]],
+    chart:{multi:true,xlabel:'φ, deg',series:[
+      {label:'P',data:rows.map(r=>({x:r.x,y:r.p})),color:getCSS('--color-primary')},
+      {label:'Q',data:rows.map(r=>({x:r.x,y:r.q})),color:getCSS('--color-orange')}
+    ]},
+    table:{head:['φ, deg','P, W','Q, var','PF'],rows:rows.map(r=>[fmt(r.x),fmt(r.p),fmt(r.q),fmt(r.pf)])}
+  };
+}
+
+function initNav(){const wrap=document.getElementById('nav');wrap.innerHTML='';Object.entries(MODE_GROUPS).forEach(([group,keys])=>{const block=document.createElement('div');block.className='nav-section';const title=document.createElement('div');title.className='group-title';title.textContent=group;block.appendChild(title);const navGroup=document.createElement('div');navGroup.className='nav-group';keys.forEach(key=>{const sec=appState.sections[key];const btn=document.createElement('button');btn.innerHTML=`<strong>${sec.title}</strong><small>${sec.description}</small>`;if(key===appState.section)btn.className='active';btn.onclick=()=>{appState.section=key;appState.submode=Object.keys(sec.submodes)[0];render();};navGroup.appendChild(btn);});block.appendChild(navGroup);wrap.appendChild(block);});if(!appState.submode) appState.submode=Object.keys(appState.sections[appState.section].submodes)[0];}
+function renderSubmodes(sec){const wrap=document.getElementById('submodeChips');wrap.innerHTML='';Object.entries(sec.submodes).forEach(([key,sub])=>{const b=document.createElement('button');b.className='chip'+(key===appState.submode?' active':'');b.textContent=sub.name;b.onclick=()=>{appState.submode=key;render();};wrap.appendChild(b);});}
+function renderFields(sub){const wrap=document.getElementById('fields');wrap.innerHTML='';sub.fields.forEach(f=>{const div=document.createElement('div');div.className='field';div.innerHTML=`<label for="fld_${f.key}">${f.label}</label><input id="fld_${f.key}" type="number" step="any" value="${f.value}"><div class="hint">Измени параметр и пересчитай.</div>`;wrap.appendChild(div);});}
+function collectValues(sub){const out={};sub.fields.forEach(f=>{const el=document.getElementById('fld_'+f.key);out[f.key]=el?el.value:f.value;});return out;}
+function renderResults(cards){const wrap=document.getElementById('results');wrap.innerHTML='';cards.forEach(([k,v])=>{const c=document.createElement('div');c.className='card';c.innerHTML=`<div class="k">${k}</div><div class="v">${v}</div>`;wrap.appendChild(c);});}
+function renderTable(table){document.getElementById('tableHead').innerHTML=table.head.map(h=>`<th>${h}</th>`).join('');document.getElementById('tableBody').innerHTML=table.rows.slice(0,300).map(r=>`<tr>${r.map(v=>`<td>${v}</td>`).join('')}</tr>`).join('');appState.currentSweep=[table.head,...table.rows];}
+function renderChart(chart){const ctx=document.getElementById('mainChart');if(appState.chart)appState.chart.destroy();let datasets=[];if(chart.multi){datasets=chart.series.map(s=>({label:s.label,data:s.data,borderColor:s.color,backgroundColor:s.color,pointRadius:0,borderWidth:2,tension:.18}));} else {datasets=[{label:chart.label,data:chart.data,borderColor:getCSS('--color-primary'),backgroundColor:getCSS('--color-primary'),pointRadius:0,borderWidth:2,tension:.18}];}
+appState.chart=new Chart(ctx,{type:'line',data:{datasets},options:{responsive:true,maintainAspectRatio:false,parsing:false,interaction:{mode:'nearest',intersect:false},plugins:{legend:{labels:{color:getCSS('--color-text')}}},scales:{x:{type:chart.logX?'logarithmic':'linear',ticks:{color:getCSS('--color-text-muted')},title:{display:true,text:chart.xlabel,color:getCSS('--color-text-muted')},grid:{color:'rgba(120,120,120,.12)'}},y:{ticks:{color:getCSS('--color-text-muted')},grid:{color:'rgba(120,120,120,.12)'}}}}});document.getElementById('chartTitle').textContent=chart.multi?'Графики':`График: ${chart.label}`;}
+function calculate(){const sec=appState.sections[appState.section];const sub=sec.submodes[appState.submode];const values=collectValues(sub);const out=sub.compute(values);document.getElementById('sectionTitle').textContent=sec.title;document.getElementById('sectionDescription').textContent=sec.description;document.getElementById('equationBox').textContent=sec.equation;document.getElementById('activeModeLabel').textContent=sub.name;document.getElementById('headlineMetric').textContent=out.headline;document.getElementById('phaseMetric').textContent=out.phase;document.getElementById('sweepMetric').textContent=String(values.points||values.samples||'—');document.getElementById('complexView').textContent=out.complex;document.getElementById('footnote').textContent=sec.foot;renderResults(out.cards);renderChart(out.chart);renderTable(out.table);}
+function render(){initNav();const sec=appState.sections[appState.section];if(!appState.submode || !sec.submodes[appState.submode])appState.submode=Object.keys(sec.submodes)[0];renderSubmodes(sec);renderFields(sec.submodes[appState.submode]);calculate();}
+function exportCsv(){const rows=appState.currentSweep||[];const csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${appState.section}-${appState.submode}.csv`;a.click();URL.revokeObjectURL(url);} 
+function resetActive(){const sub=appState.sections[appState.section].submodes[appState.submode];sub.fields.forEach(f=>{const el=document.getElementById('fld_'+f.key);if(el)el.value=f.value;});calculate();}
+document.getElementById('calculateBtn').onclick=calculate;document.getElementById('exportCsvBtn').onclick=exportCsv;document.getElementById('resetAll').onclick=resetActive;(function(){const t=document.getElementById('themeToggle'),r=document.documentElement;let d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';r.setAttribute('data-theme',d);t.onclick=()=>{d=d==='dark'?'light':'dark';r.setAttribute('data-theme',d);calculate();};})();render();
+</script>
+</body>
+</html>
