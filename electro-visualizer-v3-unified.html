@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>electro-visualizer-v3-unified</title>
+  <title>electro-visualizer-v3-unified-fixed</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -31,16 +31,78 @@
     *{box-sizing:border-box;margin:0;padding:0} html,body{min-height:100%}
     body{font-family:var(--font-body);font-size:var(--text-base);line-height:1.55;background:var(--color-bg);color:var(--color-text)}
     button,input,select{font:inherit;color:inherit} button{cursor:pointer;border:none;background:none}
-    .app{display:grid;grid-template-columns:320px 1fr;min-height:100vh}
-    .sidebar{background:var(--color-surface);border-right:1px solid var(--color-border);padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-6);position:sticky;top:0;height:100vh}
-    .brand{display:flex;gap:var(--space-3);align-items:center}.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--color-primary),var(--color-blue));display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-md)}
-    .logo svg{width:24px;height:24px}.brand h1{font-size:var(--text-lg);line-height:1.05}.brand p{font-size:var(--text-sm);color:var(--color-text-muted);margin-top:2px}
-    .group-title{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted);margin-bottom:8px}
-    .nav-group{display:grid;gap:var(--space-2);margin-bottom:var(--space-3)}
-    .nav-group button{padding:12px 14px;border-radius:14px;text-align:left;background:transparent;border:1px solid transparent;min-height:44px}
-    .nav-group button.active{background:var(--color-surface-offset);border-color:var(--color-border);box-shadow:var(--shadow-sm)}
-    .nav-group small{display:block;color:var(--color-text-muted);font-size:var(--text-xs);margin-top:2px}
-    .sidebar-footer{margin-top:auto;display:grid;gap:var(--space-3)} .toggle,.action-btn{min-height:44px;padding:12px 14px;border-radius:12px;border:1px solid var(--color-border);background:var(--color-surface-2)}
+    .app{display:grid;grid-template-columns:286px 1fr;min-height:100vh}
+    .sidebar{
+      background:var(--color-surface);
+      border-right:1px solid var(--color-border);
+      padding:var(--space-5);
+      display:flex;
+      flex-direction:column;
+      gap:var(--space-5);
+      position:sticky;
+      top:0;
+      height:100vh;
+      overflow:auto;
+      scrollbar-width:thin;
+    }
+    .brand{display:flex;gap:var(--space-3);align-items:center;padding-bottom:var(--space-1)}
+    .logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--color-primary),var(--color-blue));display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-md);flex:0 0 auto}
+    .logo svg{width:21px;height:21px}
+    .brand h1{font-size:1.08rem;line-height:1.02;font-weight:750;letter-spacing:-.02em}
+    .brand p{font-size:.9rem;color:var(--color-text-muted);margin-top:4px;line-height:1.35}
+    #nav{display:grid;gap:var(--space-4);min-height:0}
+    .nav-section{display:grid;gap:10px}
+    .group-title{
+      font-size:.72rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:var(--color-text-faint);
+      margin-bottom:0;
+      padding-left:2px;
+      font-weight:700;
+    }
+    .nav-group{display:grid;gap:8px;margin-bottom:0}
+    .nav-group button{
+      padding:10px 12px;
+      border-radius:13px;
+      text-align:left;
+      background:transparent;
+      border:1px solid transparent;
+      min-height:0;
+      transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease;
+    }
+    .nav-group button:hover{background:rgba(255,255,255,.02);border-color:var(--color-border)}
+    .nav-group button strong{
+      display:block;
+      font-size:.965rem;
+      font-weight:650;
+      line-height:1.28;
+      letter-spacing:-.01em;
+    }
+    .nav-group button.active{
+      background:color-mix(in srgb, var(--color-primary) 10%, var(--color-surface-offset));
+      border-color:color-mix(in srgb, var(--color-primary) 26%, var(--color-border));
+      box-shadow:var(--shadow-sm);
+    }
+    .nav-group small{
+      display:block;
+      color:var(--color-text-muted);
+      font-size:.82rem;
+      line-height:1.45;
+      margin-top:5px;
+      font-weight:450;
+    }
+    .sidebar-footer{
+      margin-top:var(--space-3);
+      padding-top:var(--space-4);
+      display:grid;
+      gap:var(--space-2);
+      border-top:1px solid var(--color-divider);
+      position:sticky;
+      bottom:0;
+      background:linear-gradient(to bottom, rgba(0,0,0,0), var(--color-surface) 18%);
+    }
+    .toggle,.action-btn{min-height:42px;padding:10px 12px;border-radius:12px;border:1px solid var(--color-border);background:var(--color-surface-2);font-size:.92rem;font-weight:600}
     .main{padding:var(--space-6);display:grid;gap:var(--space-6)}
     .hero{display:flex;justify-content:space-between;gap:var(--space-6);align-items:flex-start;flex-wrap:wrap}.hero h2{font-size:var(--text-xl);max-width:18ch;line-height:1.05}.hero p{max-width:70ch;color:var(--color-text-muted);margin-top:var(--space-3)}
     .status-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-4)} .stat{background:var(--color-surface);border:1px solid var(--color-border);border-radius:18px;padding:var(--space-4);box-shadow:var(--shadow-sm)}
@@ -56,7 +118,7 @@
     .card .k{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted)} .card .v{font-size:1.12rem;font-weight:800;margin-top:10px}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
     .chart-wrap{height:390px} canvas{width:100% !important;height:100% !important} table{width:100%;border-collapse:collapse;font-size:var(--text-sm)} th,td{padding:10px 8px;border-bottom:1px solid var(--color-divider);text-align:left} th{color:var(--color-text-muted);font-weight:600}
     .equation{padding:14px;border-radius:14px;background:var(--color-surface-offset);border:1px solid var(--color-border);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--text-sm);overflow:auto}.foot{color:var(--color-text-muted);font-size:var(--text-sm)}
-    @media (max-width:1160px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--color-border)}.layout{grid-template-columns:1fr}.status-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:1160px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--color-border);overflow:visible}.sidebar-footer{position:static;background:none}.layout{grid-template-columns:1fr}.status-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media (max-width:720px){.grid-2,.grid-3,.results,.status-strip{grid-template-columns:1fr}.main{padding:var(--space-4)}.sidebar{padding:var(--space-4)}.hero h2{max-width:none}}
   </style>
 </head>
@@ -265,14 +327,14 @@ function computeWaveforms(v){const Um=+v.Um,Im=+v.Im,phi=rad(+v.phi),f=+v.freq,p
 
 function computePhasor(v){const U=+v.U,I=+v.I,phiU=rad(+v.phiU),phiI=rad(+v.phiI);const ux=U*Math.cos(phiU),uy=U*Math.sin(phiU),ix=I*Math.cos(phiI),iy=I*Math.sin(phiI);const rows=buildLinearSweep(+v.scaleStart,+v.scaleEnd,+v.points).map(a=>({x:a,y:I*Math.cos(rad(a))}));return {headline:`I∠ = ${fmt(+v.phiI)}°`,phase:`Δφ = ${fmt(+v.phiI-+v.phiU)}°`,complex:`U = ${fmt(ux)} ${uy>=0?'+':'-'} j${fmt(Math.abs(uy))}\nI = ${fmt(ix)} ${iy>=0?'+':'-'} j${fmt(Math.abs(iy))}`,cards:[['Ux',fmt(ux)],['Uy',fmt(uy)],['Ix',fmt(ix)],['Iy',fmt(iy)],['|U|',fmt(U)],['|I|',fmt(I)]],chart:{label:'Re(I)',xlabel:'φI, deg',data:rows.map(r=>({x:r.x,y:r.y}))},table:{head:['φI, deg','Re(I)'],rows:rows.map(r=>[fmt(r.x),fmt(r.y)])}};}
 
-function initNav(){const wrap=document.getElementById('nav');wrap.innerHTML='';Object.entries(MODE_GROUPS).forEach(([group,keys])=>{const block=document.createElement('div');const title=document.createElement('div');title.className='group-title';title.textContent=group;block.appendChild(title);const navGroup=document.createElement('div');navGroup.className='nav-group';keys.forEach(key=>{const sec=appState.sections[key];const btn=document.createElement('button');btn.innerHTML=`<strong>${sec.title}</strong><small>${sec.description}</small>`;if(key===appState.section)btn.className='active';btn.onclick=()=>{appState.section=key;appState.submode=Object.keys(sec.submodes)[0];render();};navGroup.appendChild(btn);});block.appendChild(navGroup);wrap.appendChild(block);});if(!appState.submode) appState.submode=Object.keys(appState.sections[appState.section].submodes)[0];}
+function initNav(){const wrap=document.getElementById('nav');wrap.innerHTML='';Object.entries(MODE_GROUPS).forEach(([group,keys])=>{const block=document.createElement('div');block.className='nav-section';const title=document.createElement('div');title.className='group-title';title.textContent=group;block.appendChild(title);const navGroup=document.createElement('div');navGroup.className='nav-group';keys.forEach(key=>{const sec=appState.sections[key];const btn=document.createElement('button');btn.innerHTML=`<strong>${sec.title}</strong><small>${sec.description}</small>`;if(key===appState.section)btn.className='active';btn.onclick=()=>{appState.section=key;appState.submode=Object.keys(sec.submodes)[0];render();};navGroup.appendChild(btn);});block.appendChild(navGroup);wrap.appendChild(block);});if(!appState.submode) appState.submode=Object.keys(appState.sections[appState.section].submodes)[0];}
 function renderSubmodes(sec){const wrap=document.getElementById('submodeChips');wrap.innerHTML='';Object.entries(sec.submodes).forEach(([key,sub])=>{const b=document.createElement('button');b.className='chip'+(key===appState.submode?' active':'');b.textContent=sub.name;b.onclick=()=>{appState.submode=key;render();};wrap.appendChild(b);});}
 function renderFields(sub){const wrap=document.getElementById('fields');wrap.innerHTML='';sub.fields.forEach(f=>{const div=document.createElement('div');div.className='field';const ro=f.readonly?'readonly':'';div.innerHTML=`<label for="fld_${f.key}">${f.label}</label><input id="fld_${f.key}" type="number" step="any" value="${f.value}" ${ro}><div class="hint">${f.readonly?'Поле только для чтения':'Измени параметр и пересчитай.'}</div>`;wrap.appendChild(div);});}
 function collectValues(sub){const out={};sub.fields.forEach(f=>{const el=document.getElementById('fld_'+f.key);out[f.key]=el?el.value:f.value;});return out;}
 function renderResults(cards){const wrap=document.getElementById('results');wrap.innerHTML='';cards.forEach(([k,v])=>{const c=document.createElement('div');c.className='card';c.innerHTML=`<div class="k">${k}</div><div class="v">${v}</div>`;wrap.appendChild(c);});}
 function renderTable(table){document.getElementById('tableHead').innerHTML=table.head.map(h=>`<th>${h}</th>`).join('');document.getElementById('tableBody').innerHTML=table.rows.slice(0,300).map(r=>`<tr>${r.map(v=>`<td>${v}</td>`).join('')}</tr>`).join('');appState.currentSweep=[table.head,...table.rows];}
 function renderChart(chart){const ctx=document.getElementById('mainChart');if(appState.chart)appState.chart.destroy();let datasets=[];if(chart.multi){datasets=chart.series.map(s=>({label:s.label,data:s.data,borderColor:s.color,backgroundColor:s.color,pointRadius:0,borderWidth:2,tension:.18}));} else {datasets=[{label:chart.label,data:chart.data,borderColor:getCSS('--color-primary'),backgroundColor:getCSS('--color-primary'),pointRadius:0,borderWidth:2,tension:.18}];}
-appState.chart=new Chart(ctx,{type:'line',data:{datasets},options:{responsive:true,maintainAspectRatio:false,parsing:false,interaction:{mode:'nearest',intersect:false},plugins:{legend:{labels:{color:getCSS('--color-text')}}},scales:{x:{type:'linear',ticks:{color:getCSS('--color-text-muted')},title:{display:true,text:chart.xlabel,color:getCSS('--color-text-muted')},grid:{color:'rgba(120,120,120,.12)'}},y:{ticks:{color:getCSS('--color-text-muted')},grid:{color:'rgba(120,120,120,.12)'}}}}});document.getElementById('chartTitle').textContent=chart.multi?'Графики':`График: ${chart.label}`;}
+appState.chart=new Chart(ctx,{type:'line',data:{datasets},options:{responsive:true,maintainAspectRatio:false,parsing:false,interaction:{mode:'nearest',intersect:false},plugins:{legend:{labels:{color:getCSS('--color-text')}}},scales:{x:{type:chart.logX?'logarithmic':'linear',ticks:{color:getCSS('--color-text-muted')},title:{display:true,text:chart.xlabel,color:getCSS('--color-text-muted')},grid:{color:'rgba(120,120,120,.12)'}},y:{ticks:{color:getCSS('--color-text-muted')},grid:{color:'rgba(120,120,120,.12)'}}}}});document.getElementById('chartTitle').textContent=chart.multi?'Графики':`График: ${chart.label}`;}
 function calculate(){const sec=appState.sections[appState.section];const sub=sec.submodes[appState.submode];const values=collectValues(sub);const out=sub.compute(values);document.getElementById('sectionTitle').textContent=sec.title;document.getElementById('sectionDescription').textContent=sec.description;document.getElementById('equationBox').textContent=sec.equation;document.getElementById('activeModeLabel').textContent=sub.name;document.getElementById('headlineMetric').textContent=out.headline;document.getElementById('phaseMetric').textContent=out.phase;document.getElementById('sweepMetric').textContent=String(values.points||'—');document.getElementById('complexView').textContent=out.complex;document.getElementById('footnote').textContent=sec.foot;renderResults(out.cards);renderChart(out.chart);renderTable(out.table);}
 function render(){initNav();const sec=appState.sections[appState.section];if(!appState.submode || !sec.submodes[appState.submode])appState.submode=Object.keys(sec.submodes)[0];renderSubmodes(sec);renderFields(sec.submodes[appState.submode]);calculate();}
 function exportCsv(){const rows=appState.currentSweep||[];const csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${appState.section}-${appState.submode}.csv`;a.click();URL.revokeObjectURL(url);} 
