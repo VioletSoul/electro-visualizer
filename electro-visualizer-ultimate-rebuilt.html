@@ -199,7 +199,7 @@ th{color:var(--color-text-muted);font-weight:700;position:sticky;top:0;backgroun
 
       <section class="panel">
         <h3>Подсказка</h3>
-        <p class="foot" id="footnote">Basic, Advanced и Pro объединены в одном приложении.</p>
+        <p class="foot" id="footnote">Pro версия приложения.</p>
       </section>
     </main>
   </div>
@@ -218,7 +218,7 @@ const appState = {
   sections:{
     dcBasics:{
       title:'Базовые DC-расчёты',
-      description:'Закон Ома, мощность и энергия — базовый уровень из v1/v2.',
+      description:'Закон Ома, мощность и энергия',
       equation:'U = I·R, P = U·I, E = P·t',
       foot:'В этих режимах можно оставить одно поле пустым для расчёта недостающей величины, но здесь всё работает как числовой калькулятор с графиком sweep.',
       submodes:{
@@ -247,9 +247,9 @@ const appState = {
     },
     acBasic:{
       title:'Базовые AC-параметры',
-      description:'Импеданс, реактивные сопротивления и комплексная мощность из расширенной версии.',
+      description:'Импеданс, реактивные сопротивления и комплексная мощность.',
       equation:'X_L = 2πfL, X_C = 1/(2πfC), S = U·I',
-      foot:'Здесь собраны промежуточные режимы v2: AC, мощность и реактивные элементы.',
+      foot:'AC, мощность и реактивные элементы.',
       submodes:{
         reactance:{name:'Reactance',fields:[{key:'f',label:'Частота f (Гц)',value:50},{key:'L',label:'L (Гн)',value:0.1},{key:'C',label:'C (Ф)',value:0.0001},{key:'fStart',label:'Sweep старт f',value:1},{key:'fEnd',label:'Sweep конец f',value:5000},{key:'points',label:'Точек sweep',value:121}],compute:(v)=>{const f=+v.f,L=+v.L,C=+v.C; const XL=2*Math.PI*f*L, XC=1/(2*Math.PI*f*C); const rows=buildLogSweep(+v.fStart,+v.fEnd,+v.points).map(ff=>({x:ff,xl:2*Math.PI*ff*L,xc:1/(2*Math.PI*ff*C)})); return {headline:`XL = ${fmt(XL)} Ω`,phase:`XC = ${fmt(XC)} Ω`,complex:`X_L = ${fmt(XL)} Ω\nX_C = ${fmt(XC)} Ω`,cards:[['XL',`${fmt(XL)} Ω`],['XC',`${fmt(XC)} Ω`],['f',`${fmt(f)} Hz`],['L',`${fmt(L)} H`],['C',`${fmt(C)} F`],['XL-XC',`${fmt(XL-XC)} Ω`]],chart:{multi:true,xlabel:'f, Hz',logX:true,series:[{label:'XL',data:rows.map(r=>({x:r.x,y:r.xl})),color:getCSS('--color-primary')},{label:'XC',data:rows.map(r=>({x:r.x,y:r.xc})),color:getCSS('--color-orange')}]},table:{head:['f, Hz','XL, Ω','XC, Ω'],rows:rows.map(r=>[fmt(r.x),fmt(r.xl),fmt(r.xc)])}};}},
         acPower:{name:'AC Power',fields:[{key:'U',label:'U (В)',value:230},{key:'I',label:'I (А)',value:5},{key:'phi',label:'φ (град)',value:30},{key:'phiStart',label:'Sweep старт φ',value:-85},{key:'phiEnd',label:'Sweep конец φ',value:85},{key:'points',label:'Точек sweep',value:121}],compute:(v)=>computeAcPower(v)}
@@ -259,7 +259,7 @@ const appState = {
       title:'RC / RL-цепи',
       description:'Постоянная времени, частота среза и амплитудно-фазовые характеристики.',
       equation:'τ_RC = R·C, τ_RL = L/R, f_c = 1/(2πRC) или R/(2πL)',
-      foot:'Режимы v2 для фильтров первого порядка сохранены и объединены в едином интерфейсе.',
+      foot:'Режимы для фильтров первого порядка сохранены и объединены в едином интерфейсе.',
       submodes:{
         rcLowpass:{name:'RC Low-pass',fields:[{key:'R',label:'R (Ом)',value:1000},{key:'C',label:'C (Ф)',value:0.0000001},{key:'Uin',label:'Uin (В)',value:5},{key:'freqStart',label:'f старт',value:10},{key:'freqEnd',label:'f конец',value:50000},{key:'points',label:'Точек sweep',value:161}],compute:(v)=>computeFirstOrder(v,'rc')},
         rlHighpass:{name:'RL High-pass',fields:[{key:'R',label:'R (Ом)',value:100},{key:'L',label:'L (Гн)',value:0.05},{key:'Uin',label:'Uin (В)',value:5},{key:'freqStart',label:'f старт',value:1},{key:'freqEnd',label:'f конец',value:5000},{key:'points',label:'Точек sweep',value:161}],compute:(v)=>computeFirstOrder(v,'rl')},
@@ -289,7 +289,7 @@ const appState = {
       title:'RLC и Боде',
       description:'Последовательная и параллельная RLC-цепь, резонанс и добротность.',
       equation:'f0 = 1/(2π√(LC))',
-      foot:'RLC-модели из v3 полностью сохранены.',
+      foot:'RLC-модели',
       submodes:{
         series:{name:'Series RLC',fields:[{key:'U',label:'U (В)',value:10},{key:'R',label:'R (Ом)',value:22},{key:'L',label:'L (Гн)',value:0.05},{key:'C',label:'C (Ф)',value:0.000001},{key:'freqStart',label:'f старт',value:10},{key:'freqEnd',label:'f конец',value:50000},{key:'points',label:'Точек sweep',value:161}],compute:(v)=>computeRLC(v,'series')},
         parallel:{name:'Parallel RLC',fields:[{key:'U',label:'U (В)',value:10},{key:'R',label:'R (Ом)',value:220},{key:'L',label:'L (Гн)',value:0.05},{key:'C',label:'C (Ф)',value:0.000001},{key:'freqStart',label:'f старт',value:10},{key:'freqEnd',label:'f конец',value:50000},{key:'points',label:'Точек sweep',value:161}],compute:(v)=>computeRLC(v,'parallel')}
@@ -299,7 +299,7 @@ const appState = {
       title:'Фазоры и синусоиды',
       description:'Временные формы и фазорное представление напряжения и тока.',
       equation:'u(t)=Û sin(ωt), i(t)=Î sin(ωt-φ)',
-      foot:'Режимы фазоров и синусоид также включены в unified-версию.',
+      foot:'Режимы фазоров и синусоид',
       submodes:{
         waveform:{name:'Waveforms',fields:[{key:'Um',label:'Û (В)',value:325},{key:'Im',label:'Î (А)',value:7.5},{key:'phi',label:'φ (град)',value:35},{key:'freq',label:'f (Гц)',value:50},{key:'periods',label:'Периодов',value:2},{key:'points',label:'Точек',value:240}],compute:(v)=>computeWaveforms(v)},
         phasor:{name:'Phasor XY',fields:[{key:'U',label:'|U|',value:230},{key:'I',label:'|I|',value:5},{key:'phiU',label:'Угол U',value:0},{key:'phiI',label:'Угол I',value:-30},{key:'scaleStart',label:'Sweep старт φI',value:-180},{key:'scaleEnd',label:'Sweep конец φI',value:180},{key:'points',label:'Точек',value:121}],compute:(v)=>computePhasor(v)}
@@ -369,7 +369,7 @@ rlcplus:{
       title:'RLC Pro+',
       description:'Расширенный RLC-анализ с bandwidth, peak current и отклонением от резонанса.',
       equation:'f0 = 1/(2π√LC), Q = (1/R)√(L/C)',
-      foot:'Подходит для оценки не только резонанса, но и практического поведения вокруг рабочей частоты.',
+      foot:'Подходит для оценки резонанса и практического поведения вокруг рабочей частоты.',
       submodes:{
         seriesPlus:{name:'Series RLC+',fields:[
           {key:'U',label:'U (В)',value:10},
