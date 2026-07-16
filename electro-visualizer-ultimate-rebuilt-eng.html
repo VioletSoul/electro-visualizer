@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>electro-visualizer-ultimate-rebuilt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <style>
+        :root, [data-theme="light"] {
+            --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+            --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+            --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+            --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+            --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+            --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+            --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
+            --space-12: 3rem; --space-16: 4rem;
+            --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-2: #fbfbf9; --color-surface-offset: #f3f0ec;
+            --color-border: #d4d1ca; --color-divider: #dcd9d5; --color-text: #28251d; --color-text-muted: #6d6b66;
+            --color-text-faint: #a6a39e; --color-text-inverse: #f9f8f4; --color-primary: #01696f; --color-primary-hover: #0c4e54;
+            --color-blue: #006494; --color-orange: #da7101; --color-gold: #d19900; --color-success: #437a22; --color-error: #a12c7b;
+            --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-full: 9999px;
+            --shadow-sm: 0 1px 2px rgba(20,20,20,.06); --shadow-md: 0 10px 24px rgba(20,20,20,.08); --shadow-lg: 0 18px 40px rgba(20,20,20,.12);
+            --font-body: Inter, system-ui, sans-serif; --font-display: Inter, system-ui, sans-serif;
+            --sidebar-w: 250px;
+        }
+        [data-theme="dark"] {
+            --color-bg:#171614; --color-surface:#1c1b19; --color-surface-2:#201f1d; --color-surface-offset:#22211f;
+            --color-border:#393836; --color-divider:#262523; --color-text:#e1dfdb; --color-text-muted:#a5a29b; --color-text-faint:#6f6c66;
+            --color-text-inverse:#171614; --color-primary:#4f98a3; --color-primary-hover:#63aab5; --color-blue:#74a8d6; --color-orange:#fdab43;
+            --color-gold:#e8af34; --color-success:#7ab856; --color-error:#dd78b6; --shadow-sm:0 1px 2px rgba(0,0,0,.2); --shadow-md:0 10px 24px rgba(0,0,0,.3);
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        html,body{min-height:100%}
+        body{font-family:var(--font-body);font-size:var(--text-base);line-height:1.55;background:var(--color-bg);color:var(--color-text)}
+        button,input,select{font:inherit;color:inherit}
+        button{cursor:pointer;border:none;background:none}
+        img,svg,canvas{display:block;max-width:100%}
+
+        .app{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}
+        .sidebar{background:var(--color-surface);border-right:1px solid var(--color-border);height:100vh;position:sticky;top:0;display:grid;grid-template-rows:auto 1fr auto;overflow:hidden}
+        .sidebar-top{padding:18px 14px 10px;border-bottom:1px solid var(--color-divider);background:var(--color-surface);z-index:2}
+        .brand{display:flex;gap:12px;align-items:flex-start}
+        .logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--color-primary),var(--color-blue));display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-sm);flex:0 0 auto}
+        .logo svg{width:18px;height:18px}
+        .brand h1{font-size:1.08rem;line-height:1.02;font-weight:800;letter-spacing:-.03em}
+        .brand p{font-size:12px;color:var(--color-text-muted);margin-top:3px}
+        .sidebar-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+        .toggle,.action-btn{min-height:42px;padding:10px 12px;border-radius:12px;border:1px solid var(--color-border);background:var(--color-surface-2);font-size:.88rem;font-weight:700;box-shadow:var(--shadow-sm)}
+        .nav-scroll{overflow:auto;padding:10px 10px 16px}
+        .group-title{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--color-text-muted);margin:12px 4px 8px}
+        .nav-group{display:grid;gap:6px}
+        .nav-group button{padding:10px 11px;border-radius:12px;text-align:left;background:transparent;border:1px solid transparent;min-height:44px;transition:.18s ease}
+        .nav-group button:hover{background:var(--color-surface-2);border-color:var(--color-divider)}
+        .nav-group button.active{background:var(--color-surface-offset);border-color:var(--color-border);box-shadow:var(--shadow-sm)}
+        .nav-group strong{display:block;font-size:.92rem;line-height:1.15}
+        .nav-group small{display:block;color:var(--color-text-muted);font-size:.74rem;line-height:1.25;margin-top:3px}
+        .sidebar-footer{padding:12px 14px 16px;border-top:1px solid var(--color-divider);background:var(--color-surface)}
+        .sidebar-footer .footnote{font-size:.8rem;color:var(--color-text-muted)}
+
+        .main{padding:22px;display:grid;gap:18px;min-width:0}
+        .hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
+        .hero h2{font-size:clamp(2rem,1.6rem + 1vw,2.7rem);line-height:.98;letter-spacing:-.04em;max-width:14ch}
+        .hero p{max-width:70ch;color:var(--color-text-muted);margin-top:10px}
+        .equation{padding:12px 14px;border-radius:14px;background:var(--color-surface);border:1px solid var(--color-border);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--text-sm);overflow:auto;white-space:nowrap;box-shadow:var(--shadow-sm)}
+        .status-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+        .stat{background:var(--color-surface);border:1px solid var(--color-border);border-radius:16px;padding:14px 15px;box-shadow:var(--shadow-sm);min-width:0}
+        .stat .label{font-size:11px;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.12em}
+        .stat .value{font-size:1.14rem;font-weight:800;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .layout{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(320px,.88fr);gap:18px}
+        .panel{background:var(--color-surface);border:1px solid var(--color-border);border-radius:20px;padding:16px;box-shadow:var(--shadow-sm);min-width:0}
+        .panel h3{font-size:1rem;margin-bottom:14px}
+        .grid-2,.grid-3{display:grid;gap:12px}
+        .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+        .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+        .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+        .chip{padding:9px 12px;border-radius:999px;border:1px solid var(--color-border);background:var(--color-surface-2);font-size:.87rem;min-height:40px}
+        .chip.active{background:var(--color-primary);color:var(--color-text-inverse);border-color:transparent}
+        .field{display:grid;gap:7px;min-width:0}
+        .field label{font-size:.9rem;font-weight:700}
+        .field input,.field select{width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--color-border);background:var(--color-surface-2);min-height:44px}
+        .field .hint{font-size:12px;color:var(--color-text-muted)}
+        .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+        .btn-primary,.btn-secondary{min-height:44px;padding:11px 15px;border-radius:12px;font-weight:800;box-shadow:var(--shadow-sm)}
+        .btn-primary{background:var(--color-primary);color:var(--color-text-inverse)}
+        .btn-primary:hover{background:var(--color-primary-hover)}
+        .btn-secondary{background:var(--color-surface-offset);border:1px solid var(--color-border)}
+        .results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        .card{padding:14px;border-radius:16px;background:var(--color-surface-2);border:1px solid var(--color-border);min-width:0}
+        .card .k{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--color-text-muted)}
+        .card .v{font-size:1.02rem;font-weight:800;margin-top:8px;overflow-wrap:anywhere}
+        .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+        .chart-wrap{height:380px}
+        canvas{width:100% !important;height:100% !important}
+        table{width:100%;border-collapse:collapse;font-size:.9rem}
+        th,td{padding:10px 8px;border-bottom:1px solid var(--color-divider);text-align:left;vertical-align:top}
+        th{color:var(--color-text-muted);font-weight:700;position:sticky;top:0;background:var(--color-surface)}
+        .foot{color:var(--color-text-muted);font-size:var(--text-sm)}
+        .table-scroll{overflow:auto;max-height:420px;border-radius:14px}
+
+        @media (max-width: 1220px){
+            .status-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+            .layout{grid-template-columns:1fr}
+        }
+        @media (max-width: 980px){
+            .app{grid-template-columns:1fr}
+            .sidebar{position:relative;height:auto;grid-template-rows:auto auto auto;border-right:none;border-bottom:1px solid var(--color-border)}
+            .nav-scroll{max-height:320px}
+            .main{padding:16px}
+            .hero{grid-template-columns:1fr}
+            .hero h2{max-width:none}
+        }
+        @media (max-width: 720px){
+            .status-strip,.grid-2,.grid-3,.results{grid-template-columns:1fr}
+            .sidebar-top{padding:14px 12px 10px}
+            .nav-scroll{padding:8px}
+            .panel{padding:14px}
+            .chart-wrap{height:320px}
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="sidebar-top">
+            <div class="brand">
+                <div class="logo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h4l2-8 4 12 2-6h4"></path></svg>
+                </div>
+                <div>
+                    <h1>Electro Visualizer Ultimate</h1>
+                    <p>basic, advanced, pro</p>
+                </div>
+            </div>
+            <div class="sidebar-actions">
+                <button class="toggle" id="themeToggle">🌓 Theme</button>
+                <button class="action-btn" id="resetAll">Reset active</button>
+            </div>
+        </div>
+        <div class="nav-scroll">
+            <div id="nav"></div>
+        </div>
+        <div class="sidebar-footer">
+            <div class="footnote">EV Ultimate v2.1.2</div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <section class="hero">
+            <div>
+                <h2 id="sectionTitle">Unified calculator</h2>
+                <p id="sectionDescription">A unified app that combines basic calculations, AC/RC/RL modes, and advanced analysis with complex numbers, phasors, and RLC.</p>
+            </div>
+            <div class="equation" id="equationBox">U = I·R</div>
+        </section>
+
+        <section class="status-strip">
+            <div class="stat"><div class="label">Mode</div><div class="value" id="activeModeLabel"></div></div>
+            <div class="stat"><div class="label">Key result</div><div class="value" id="headlineMetric"></div></div>
+            <div class="stat"><div class="label">Phase / secondary</div><div class="value" id="phaseMetric"></div></div>
+            <div class="stat"><div class="label">Sweep points</div><div class="value" id="sweepMetric"></div></div>
+        </section>
+
+        <section class="layout">
+            <div class="panel">
+                <h3>Parameters</h3>
+                <div class="chips" id="submodeChips"></div>
+                <div class="grid-2" id="fields"></div>
+                <div class="actions">
+                    <button class="btn-primary" id="calculateBtn">Calculate</button>
+                    <button class="btn-secondary" id="exportCsvBtn">Export CSV</button>
+                </div>
+            </div>
+            <div class="panel">
+                <h3>Results</h3>
+                <div class="results" id="results"></div>
+                <div style="margin-top: var(--space-4);" class="equation mono" id="complexView"></div>
+            </div>
+        </section>
+
+        <section class="layout">
+            <div class="panel">
+                <h3 id="chartTitle">Chart</h3>
+                <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
+            </div>
+            <div class="panel">
+                <h3>Sweep table</h3>
+                <div class="table-scroll">
+                    <table>
+                        <thead><tr id="tableHead"></tr></thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h3>Hint</h3>
+            <p class="foot" id="footnote">Pro version of the application.</p>
+        </section>
+    </main>
+</div>
+<script>
+    const MODE_GROUPS = {
+        Basic: ['dcBasics','material','divider'],
+        Advanced: ['acBasic','filters','bridge'],
+        Pro: ['complex','rlc','phasor','sweep']
+    };
+
+    const appState = {
+        section:'dcBasics',
+        submode:null,
+        chart:null,
+        currentSweep:[],
+        sections:{
+            dcBasics:{
+                title:'Basic DC calculations',
+                description:'Ohm’s law, power, and energy',
+                equation:'U = I·R, P = U·I, E = P·t',
+                foot:'In these modes, you can leave one field empty to calculate the missing value, but here everything works as a numeric calculator with a sweep chart.',
+                submodes:{
+                    ohm:{name:'Ohm Law',fields:[{key:'U',label:'Voltage U (V)',value:12},{key:'I',label:'Current I (A)',value:2},{key:'R',label:'Resistance R (Ohm)',value:6},{key:'varStart',label:'Sweep start R',value:1},{key:'varEnd',label:'Sweep end R',value:20},{key:'points',label:'Sweep points',value:121}],compute:(v)=>{const U=+v.U,I=+v.I,R=+v.R; const rows=buildLinearSweep(+v.varStart,+v.varEnd,+v.points).map(r=>({x:r,y:U/r})); return {headline:`I = ${fmt(U/R)} A`,phase:`R = ${fmt(R)} Ω`,complex:`U = ${fmt(U)} V\nI = U / R = ${fmt(U/R)} A\nR = ${fmt(R)} Ω`,cards:[['U',`${fmt(U)} V`],['I',`${fmt(U/R)} A`],['R',`${fmt(R)} Ω`],['P',`${fmt(U*(U/R))} W`],['G',`${fmt(1/R)} S`],['ρ-equivalent','—']],chart:{label:'I(A)',xlabel:'R, Ω',data:rows.map(r=>({x:r.x,y:r.y}))},table:{head:['R, Ω','I, A'],rows:rows.map(r=>[fmt(r.x),fmt(r.y)])}};}},
+                    power:{name:'Power',fields:[{key:'U',label:'U (V)',value:230},{key:'I',label:'I (A)',value:5},{key:'varStart',label:'Sweep start I',value:0},{key:'varEnd',label:'Sweep end I',value:10},{key:'points',label:'Sweep points',value:121}],compute:(v)=>{const U=+v.U,I=+v.I,P=U*I; const rows=buildLinearSweep(+v.varStart,+v.varEnd,+v.points).map(i=>({x:i,y:U*i})); return {headline:`P = ${fmt(P)} W`,phase:`U = ${fmt(U)} V`,complex:`P = U·I = ${fmt(U)} × ${fmt(I)} = ${fmt(P)} W`,cards:[['P',`${fmt(P)} W`],['U',`${fmt(U)} V`],['I',`${fmt(I)} A`],['R(eq)',`${fmt(U/I)} Ω`],['E for 1s',`${fmt(P)} J`],['kW',`${fmt(P/1000)} kW`]],chart:{label:'P(W)',xlabel:'I, A',data:rows.map(r=>({x:r.x,y:r.y}))},table:{head:['I, A','P, W'],rows:rows.map(r=>[fmt(r.x),fmt(r.y)])}};}},
+                    energy:{name:'Energy',fields:[{key:'P',label:'Power P (W)',value:100},{key:'t',label:'Time t (s)',value:3600},{key:'varStart',label:'Sweep start t',value:0},{key:'varEnd',label:'Sweep end t',value:7200},{key:'points',label:'Sweep points',value:121}],compute:(v)=>{const P=+v.P,t=+v.t,E=P*t; const rows=buildLinearSweep(+v.varStart,+v.varEnd,+v.points).map(tt=>({x:tt,y:P*tt})); return {headline:`E = ${fmt(E)} J`,phase:`${fmt(E/3600000)} kWh`,complex:`E = P·t = ${fmt(P)} × ${fmt(t)} = ${fmt(E)} J`,cards:[['Energy',`${fmt(E)} J`],['kWh',`${fmt(E/3600000)} kWh`],['P',`${fmt(P)} W`],['t',`${fmt(t)} s`],['t, h',`${fmt(t/3600)} h`],['Average power',`${fmt(P)} W`]],chart:{label:'E(J)',xlabel:'t, s',data:rows.map(r=>({x:r.x,y:r.y}))},table:{head:['t, s','E, J'],rows:rows.map(r=>[fmt(r.x),fmt(r.y)])}};}}
+                }
+            },
+            material:{
+                title:'Conductor resistance',
+                description:'Resistance calculation based on resistivity, length, and cross-sectional area.',
+                equation:'R = ρ·L / S',
+                foot:'Suitable for educational cable and conductor calculations without temperature correction.',
+                submodes:{
+                    conductor:{name:'Conductor R',fields:[{key:'rho',label:'ρ (Ohm·mm²/m)',value:0.0175},{key:'L',label:'Length L (m)',value:20},{key:'S',label:'Cross-section S (mm²)',value:2.5},{key:'varStart',label:'Sweep start L',value:1},{key:'varEnd',label:'Sweep end L',value:100},{key:'points',label:'Sweep points',value:121}],compute:(v)=>{const rho=+v.rho,L=+v.L,S=+v.S,R=rho*L/S; const rows=buildLinearSweep(+v.varStart,+v.varEnd,+v.points).map(l=>({x:l,y:rho*l/S})); return {headline:`R = ${fmt(R)} Ω`,phase:`S = ${fmt(S)} mm²`,complex:`R = ρ·L/S = ${fmt(rho)} × ${fmt(L)} / ${fmt(S)} = ${fmt(R)} Ω`,cards:[['R',`${fmt(R)} Ω`],['ρ',`${fmt(rho)} Ohm·mm²/m`],['L',`${fmt(L)} m`],['S',`${fmt(S)} mm²`],['Conductance',`${fmt(1/R)} S`],['R per 100 m',`${fmt(rho*100/S)} Ω`]],chart:{label:'R(Ω)',xlabel:'L, m',data:rows.map(r=>({x:r.x,y:r.y}))},table:{head:['L, m','R, Ω'],rows:rows.map(r=>[fmt(r.x),fmt(r.y)])}};}}
+                }
+            },
+            divider:{
+                title:'Voltage divider',
+                description:'Classic resistive divider with R2 sweep.',
+                equation:'Uout = Uin·R2/(R1+R2)',
+                foot:'This mode is useful for preliminary component value selection.',
+                submodes:{
+                    divider:{name:'Divider',fields:[{key:'Uin',label:'Uin (V)',value:12},{key:'R1',label:'R1 (Ohm)',value:2200},{key:'R2',label:'R2 (Ohm)',value:1000},{key:'R2start',label:'Sweep start R2',value:100},{key:'R2end',label:'Sweep end R2',value:10000},{key:'points',label:'Sweep points',value:121}],compute:(v)=>computeDivider(v)}
+                }
+            },
+            acBasic:{
+                title:'Basic AC parameters',
+                description:'Impedance, reactances, and complex power.',
+                equation:'X_L = 2πfL, X_C = 1/(2πfC), S = U·I',
+                foot:'AC, power, and reactive elements.',
+                submodes:{
+                    reactance:{name:'Reactance',fields:[{key:'f',label:'Frequency f (Hz)',value:50},{key:'L',label:'L (H)',value:0.1},{key:'C',label:'C (F)',value:0.0001},{key:'fStart',label:'Sweep start f',value:1},{key:'fEnd',label:'Sweep end f',value:5000},{key:'points',label:'Sweep points',value:121}],compute:(v)=>{const f=+v.f,L=+v.L,C=+v.C; const XL=2*Math.PI*f*L, XC=1/(2*Math.PI*f*C); const rows=buildLogSweep(+v.fStart,+v.fEnd,+v.points).map(ff=>({x:ff,xl:2*Math.PI*ff*L,xc:1/(2*Math.PI*ff*C)})); return {headline:`XL = ${fmt(XL)} Ω`,phase:`XC = ${fmt(XC)} Ω`,complex:`X_L = ${fmt(XL)} Ω\nX_C = ${fmt(XC)} Ω`,cards:[['XL',`${fmt(XL)} Ω`],['XC',`${fmt(XC)} Ω`],['f',`${fmt(f)} Hz`],['L',`${fmt(L)} H`],['C',`${fmt(C)} F`],['XL-XC',`${fmt(XL-XC)} Ω`]],chart:{multi:true,xlabel:'f, Hz',logX:true,series:[{label:'XL',data:rows.map(r=>({x:r.x,y:r.xl})),color:getCSS('--color-primary')},{label:'XC',data:rows.map(r=>({x:r.x,y:r.xc})),color:getCSS('--color-orange')}]},table:{head:['f, Hz','XL, Ω','XC, Ω'],rows:rows.map(r=>[fmt(r.x),fmt(r.xl),fmt(r.xc)])}};}},
+                    acPower:{name:'AC Power',fields:[{key:'U',label:'U (V)',value:230},{key:'I',label:'I (A)',value:5},{key:'phi',label:'φ (deg)',value:30},{key:'phiStart',label:'Sweep start φ',value:-85},{key:'phiEnd',label:'Sweep end φ',value:85},{key:'points',label:'Sweep points',value:121}],compute:(v)=>computeAcPower(v)}
+                }
+            },
+            filters:{
+                title:'RC / RL circuits',
+                description:'Time constant, cutoff frequency, and amplitude-phase characteristics.',
+                equation:'τ_RC = R·C, τ_RL = L/R, f_c = 1/(2πRC) or R/(2πL)',
+                foot:'First-order filter modes are preserved and combined in a unified interface.',
+                submodes:{
+                    rcLowpass:{name:'RC Low-pass',fields:[{key:'R',label:'R (Ohm)',value:1000},{key:'C',label:'C (F)',value:0.0000001},{key:'Uin',label:'Uin (V)',value:5},{key:'freqStart',label:'f start',value:10},{key:'freqEnd',label:'f end',value:50000},{key:'points',label:'Sweep points',value:161}],compute:(v)=>computeFirstOrder(v,'rc')},
+                    rlHighpass:{name:'RL High-pass',fields:[{key:'R',label:'R (Ohm)',value:100},{key:'L',label:'L (H)',value:0.05},{key:'Uin',label:'Uin (V)',value:5},{key:'freqStart',label:'f start',value:1},{key:'freqEnd',label:'f end',value:5000},{key:'points',label:'Sweep points',value:161}],compute:(v)=>computeFirstOrder(v,'rl')},
+                    timeConst:{name:'Time constants',fields:[{key:'R',label:'R (Ohm)',value:1000},{key:'C',label:'C (F)',value:0.000001},{key:'L',label:'L (H)',value:0.2},{key:'varStart',label:'Sweep start R',value:10},{key:'varEnd',label:'Sweep end R',value:5000},{key:'points',label:'Sweep points',value:121}],compute:(v)=>{const R=+v.R,C=+v.C,L=+v.L,tRC=R*C,tRL=L/R; const rows=buildLinearSweep(+v.varStart,+v.varEnd,+v.points).map(r=>({x:r,trc:r*C,trl:L/r})); return {headline:`τRC = ${fmt(tRC)} s`,phase:`τRL = ${fmt(tRL)} s`,complex:`τ_RC = R·C = ${fmt(tRC)} s\nτ_RL = L/R = ${fmt(tRL)} s`,cards:[['τRC',`${fmt(tRC)} s`],['τRL',`${fmt(tRL)} s`],['fc RC',`${fmt(1/(2*Math.PI*R*C))} Hz`],['fc RL',`${fmt(R/(2*Math.PI*L))} Hz`],['R',`${fmt(R)} Ω`],['C / L',`${fmt(C)} F / ${fmt(L)} H`]],chart:{multi:true,xlabel:'R, Ω',series:[{label:'τRC',data:rows.map(r=>({x:r.x,y:r.trc})),color:getCSS('--color-primary')},{label:'τRL',data:rows.map(r=>({x:r.x,y:r.trl})),color:getCSS('--color-orange')}]},table:{head:['R, Ω','τRC, s','τRL, s'],rows:rows.map(r=>[fmt(r.x),fmt(r.trc),fmt(r.trl)])}};}}
+                }
+            },
+            bridge:{
+                title:'Bridge and equivalents',
+                description:'Educational calculations of the Wheatstone bridge and equivalent resistance.',
+                equation:'R1/R2 = R3/Rx, Rx = R3·R2/R1',
+                foot:'This mode lets you estimate an unknown resistance in a bridge circuit under balance conditions.',
+                submodes:{
+                    wheatstone:{name:'Wheatstone',fields:[{key:'R1',label:'R1 (Ohm)',value:1000},{key:'R2',label:'R2 (Ohm)',value:2000},{key:'R3',label:'R3 (Ohm)',value:1500},{key:'sweepStart',label:'Sweep start R3',value:100},{key:'sweepEnd',label:'Sweep end R3',value:5000},{key:'points',label:'Sweep points',value:121}],compute:(v)=>{const R1=+v.R1,R2=+v.R2,R3=+v.R3,Rx=R3*R2/R1; const rows=buildLinearSweep(+v.sweepStart,+v.sweepEnd,+v.points).map(r3=>({x:r3,y:r3*R2/R1})); return {headline:`Rx = ${fmt(Rx)} Ω`,phase:`Balance`,complex:`Rx = R3·R2/R1 = ${fmt(R3)} × ${fmt(R2)} / ${fmt(R1)} = ${fmt(Rx)} Ω`,cards:[['Rx',`${fmt(Rx)} Ω`],['R1',`${fmt(R1)} Ω`],['R2',`${fmt(R2)} Ω`],['R3',`${fmt(R3)} Ω`],['R2/R1',fmt(R2/R1)],['Indication current','0 at balance']],chart:{label:'Rx(Ω)',xlabel:'R3, Ω',data:rows.map(r=>({x:r.x,y:r.y}))},table:{head:['R3, Ω','Rx, Ω'],rows:rows.map(r=>[fmt(r.x),fmt(r.y)])}};}}
+                }
+            },
+            complex:{
+                title:'Complex numbers and impedance',
+                description:'Polar and algebraic forms, current, admittance, and complex power.',
+                equation:'Z = R + jX, Y = 1/Z, S = P + jQ',
+                foot:'This is the professional mode from the previous v3: complex representation, magnitude, angle, and RMS models.',
+                submodes:{
+                    impedance:{name:'Impedance',fields:[{key:'U',label:'U (V)',value:230},{key:'R',label:'R (Ohm)',value:40},{key:'X',label:'X (Ohm)',value:30},{key:'freqStart',label:'Sweep start f',value:10},{key:'freqEnd',label:'Sweep end f',value:5000},{key:'points',label:'Sweep points',value:121}],compute:(v)=>computeComplexImpedance(v)},
+                    power:{name:'Complex Power',fields:[{key:'U',label:'U (V)',value:230},{key:'I',label:'I (A)',value:5.2},{key:'phi',label:'φ (deg)',value:36.87},{key:'phiStart',label:'Sweep start φ',value:-80},{key:'phiEnd',label:'Sweep end φ',value:80},{key:'points',label:'Sweep points',value:121}],compute:(v)=>computeAcPower(v)}
+                }
+            },
+            rlc:{
+                title:'RLC and Bode',
+                description:'Series and parallel RLC circuit, resonance and quality factor.',
+                equation:'f0 = 1/(2π√(LC))',
+                foot:'RLC models',
+                submodes:{
+                    series:{name:'Series RLC',fields:[{key:'U',label:'U (V)',value:10},{key:'R',label:'R (Ohm)',value:22},{key:'L',label:'L (H)',value:0.05},{key:'C',label:'C (F)',value:0.000001},{key:'freqStart',label:'f start',value:10},{key:'freqEnd',label:'f end',value:50000},{key:'points',label:'Sweep points',value:161}],compute:(v)=>computeRLC(v,'series')},
+                    parallel:{name:'Parallel RLC',fields:[{key:'U',label:'U (V)',value:10},{key:'R',label:'R (Ohm)',value:220},{key:'L',label:'L (H)',value:0.05},{key:'C',label:'C (F)',value:0.000001},{key:'freqStart',label:'f start',value:10},{key:'freqEnd',label:'f end',value:50000},{key:'points',label:'Sweep points',value:161}],compute:(v)=>computeRLC(v,'parallel')}
+                }
+            },
+            phasor:{
+                title:'Phasors and sinusoids',
+                description:'Time-domain waveforms and phasor representation of voltage and current.',
+                equation:'u(t)=Û sin(ωt), i(t)=Î sin(ωt-φ)',
+                foot:'Phasor and sinusoid modes',
+                submodes:{
+                    waveform:{name:'Waveforms',fields:[{key:'Um',label:'Û (V)',value:325},{key:'Im',label:'Î (A)',value:7.5},{key:'phi',label:'φ (deg)',value:35},{key:'freq',label:'f (Hz)',value:50},{key:'periods',label:'Periods',value:2},{key:'points',label:'Points',value:240}],compute:(v)=>computeWaveforms(v)},
+                    phasor:{name:'Phasor XY',fields:[{key:'U',label:'|U|',value:230},{key:'I',label:'|I|',value:5},{key:'phiU',label:'Angle U',value:0},{key:'phiI',label:'Angle I',value:-30},{key:'scaleStart',label:'Sweep start φI',value:-180},{key:'scaleEnd',label:'Sweep end φI',value:180},{key:'points',label:'Points',value:121}],compute:(v)=>computePhasor(v)}
+                }
+            },
+            sweep:{
+                title:'Engineering sweep',
+                description:'Frequency and parameter sweep for filters and dividers.',
+                equation:'H(jω), Uout(R2), table export',
+                foot:'Section for comparative characteristic analysis.',
+                submodes:{
+                    rcLowpass:{name:'RC Low-pass',fields:[{key:'R',label:'R (Ohm)',value:1000},{key:'C',label:'C (F)',value:0.0000001},{key:'Uin',label:'Uin (V)',value:5},{key:'freqStart',label:'f start',value:10},{key:'freqEnd',label:'f end',value:50000},{key:'points',label:'Sweep points',value:161}],compute:(v)=>computeFirstOrder(v,'rc')},
+                    rlHighpass:{name:'RL High-pass',fields:[{key:'R',label:'R (Ohm)',value:100},{key:'L',label:'L (H)',value:0.05},{key:'Uin',label:'Uin (V)',value:5},{key:'freqStart',label:'f start',value:1},{key:'freqEnd',label:'f end',value:5000},{key:'points',label:'Sweep points',value:161}],compute:(v)=>computeFirstOrder(v,'rl')},
+                    divider:{name:'Divider Sweep',fields:[{key:'Uin',label:'Uin (V)',value:12},{key:'R1',label:'R1 (Ohm)',value:2200},{key:'R2',label:'R2 (Ohm)',value:1000},{key:'R2start',label:'Sweep start R2',value:100},{key:'R2end',label:'Sweep end R2',value:10000},{key:'points',label:'Sweep points',value:121}],compute:(v)=>computeDivider(v)}
+                }
+            },
+            tolerance:{
+                title:'Component tolerances',
+                description:'Worst-case and spread corridor for a divider and output voltage.',
+                equation:'Uout = Uin·R2/(R1+R2)',
+                foot:'This mode shows how R1 and R2 tolerances shift the nominal result and the output range.',
+                submodes:{
+                    dividerTol:{name:'Divider tolerance',fields:[
+                            {key:'Uin',label:'Uin (V)',value:12},
+                            {key:'R1',label:'R1 (Ohm)',value:2200},
+                            {key:'R2',label:'R2 (Ohm)',value:1000},
+                            {key:'tol1',label:'R1 tolerance (%)',value:1},
+                            {key:'tol2',label:'R2 tolerance (%)',value:1},
+                            {key:'points',label:'Sweep points',value:121}
+                        ],compute:(v)=>computeTolerance(v)}
+                }
+            },
+            sensitivity:{
+                title:'Sensitivity',
+                description:'Normalized sensitivity of f0, Q, and |Z| to changes in R, L, C.',
+                equation:'Sx = (∂y/∂x)·(x/y)',
+                foot:'If |Sx| is large, the parameter is especially critical for design stability.',
+                submodes:{
+                    rlcSensitivity:{name:'RLC sensitivity',fields:[
+                            {key:'R',label:'R (Ohm)',value:22},
+                            {key:'L',label:'L (H)',value:0.05},
+                            {key:'C',label:'C (F)',value:0.000001},
+                            {key:'f',label:'Frequency (Hz)',value:1000},
+                            {key:'delta',label:'Analysis step (%)',value:1},
+                            {key:'points',label:'Sweep points',value:61}
+                        ],compute:(v)=>computeSensitivity(v)}
+                }
+            },
+            montecarlo:{
+                title:'Monte Carlo',
+                description:'Statistical spread of resonance and quality factor of RLC due to tolerances.',
+                equation:'x = x0·(1 + ε)',
+                foot:'Monte Carlo is useful when the nominal formula no longer gives you a sense of real circuit robustness.',
+                submodes:{
+                    rlcMonte:{name:'RLC Monte Carlo',fields:[
+                            {key:'R',label:'R (Ohm)',value:22},
+                            {key:'L',label:'L (H)',value:0.05},
+                            {key:'C',label:'C (F)',value:0.000001},
+                            {key:'tolR',label:'R tolerance (%)',value:5},
+                            {key:'tolL',label:'L tolerance (%)',value:5},
+                            {key:'tolC',label:'C tolerance (%)',value:10},
+                            {key:'samples',label:'Samples',value:500}
+                        ],compute:(v)=>computeMonteCarlo(v)}
+                }
+            },
+            rlcplus:{
+                title:'RLC Pro+',
+                description:'Extended RLC analysis with bandwidth, peak current, and deviation from resonance.',
+                equation:'f0 = 1/(2π√LC), Q = (1/R)√(L/C)',
+                foot:'Suitable for evaluating resonance and practical behavior around the operating frequency.',
+                submodes:{
+                    seriesPlus:{name:'Series RLC+',fields:[
+                            {key:'U',label:'U (V)',value:10},
+                            {key:'R',label:'R (Ohm)',value:22},
+                            {key:'L',label:'L (H)',value:0.05},
+                            {key:'C',label:'C (F)',value:0.000001},
+                            {key:'freqStart',label:'f start',value:10},
+                            {key:'freqEnd',label:'f end',value:50000},
+                            {key:'points',label:'Sweep points',value:161}
+                        ],compute:(v)=>computeRLCPlus(v)}
+                }
+            },
+            harmonics:{
+                title:'Harmonics and THD',
+                description:'Quick analysis of current harmonics and estimation of THD / crest factor.',
+                equation:'THD = √(ΣIₙ², n≥2) / I₁',
+                foot:'A simplified quality mode for nonlinear loads and initial assessment of current waveform shape.',
+                submodes:{
+                    currentTHD:{name:'Current THD',fields:[
+                            {key:'I1',label:'I1, fundamental (A)',value:10},
+                            {key:'I3',label:'I3 (A)',value:2.1},
+                            {key:'I5',label:'I5 (A)',value:1.4},
+                            {key:'I7',label:'I7 (A)',value:0.8},
+                            {key:'I9',label:'I9 (A)',value:0.4},
+                            {key:'points',label:'Harmonics on chart',value:9}
+                        ],compute:(v)=>computeHarmonics(v)}
+                }
+            },
+            threephase:{
+                title:'Three-phase mode',
+                description:'Balanced 3φ model: power, PF, line and phase quantities.',
+                equation:'P = √3·U_L·I_L·cosφ',
+                foot:'A quick three-phase calculation is useful as an engineering add-on over the AC modules.',
+                submodes:{
+                    balanced:{name:'Balanced 3φ',fields:[
+                            {key:'UL',label:'Uline (V)',value:400},
+                            {key:'IL',label:'Iline (A)',value:16},
+                            {key:'phi',label:'φ (deg)',value:25},
+                            {key:'eta',label:'Efficiency η (%)',value:92},
+                            {key:'varStart',label:'Sweep start φ',value:0},
+                            {key:'varEnd',label:'Sweep end φ',value:80},
+                            {key:'points',label:'Sweep points',value:121}
+                        ],compute:(v)=>computeThreePhase(v)}
+                }
+            }
+        }
+    };
+
+    function fmt(n){ if(!isFinite(n)) return '—'; const a=Math.abs(n); if(a>=1000 || (a>0 && a<0.001)) return n.toExponential(3); return Number(n).toFixed(4).replace(/\.0+$|(?<=\.[0-9]*[1-9])0+$/,''); }
+    function rad(d){return d*Math.PI/180} function deg(r){return r*180/Math.PI}
+    function getCSS(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim()}
+    function buildLinearSweep(start,end,points){const arr=[];const p=Math.max(3,Math.round(points||121)); if(start===end){for(let i=0;i<p;i++)arr.push(start);return arr;} for(let i=0;i<p;i++)arr.push(start+(end-start)*i/(p-1)); return arr;}
+    function buildLogSweep(start,end,points){const s=Math.max(start,1e-9),e=Math.max(end,s*1.0001),p=Math.max(3,Math.round(points||121));const arr=[];const ls=Math.log10(s),le=Math.log10(e);for(let i=0;i<p;i++)arr.push(10**(ls+(le-ls)*i/(p-1)));return arr;}
+
+    function computeDivider(v){const Uin=+v.Uin,R1=+v.R1,R2=+v.R2,Uout=Uin*R2/(R1+R2);const rows=buildLinearSweep(+v.R2start,+v.R2end,+v.points).map(r2=>({x:r2,y:Uin*r2/(R1+r2),k:r2/(R1+r2)}));return {headline:`Uout = ${fmt(Uout)} V`,phase:`K = ${fmt(R2/(R1+R2))}`,complex:`Uout = Uin·R2/(R1+R2) = ${fmt(Uout)} V`,cards:[['Uout',`${fmt(Uout)} V`],['K',fmt(R2/(R1+R2))],['I branch',`${fmt(Uin/(R1+R2))} A`],['R1',`${fmt(R1)} Ω`],['R2',`${fmt(R2)} Ω`],['Pout approx',`${fmt(Uout*Uout/R2)} W`]],chart:{label:'Uout(V)',xlabel:'R2, Ω',data:rows.map(r=>({x:r.x,y:r.y}))},table:{head:['R2, Ω','Uout, V','K'],rows:rows.map(r=>[fmt(r.x),fmt(r.y),fmt(r.k)])}};}
+
+    function computeAcPower(v){const U=+v.U,I=+v.I,phi=rad(+v.phi);const S=U*I,P=S*Math.cos(phi),Q=S*Math.sin(phi),pf=Math.cos(phi);const rows=buildLinearSweep(+v.phiStart,+v.phiEnd,+v.points).map(a=>{const ph=rad(a),s=U*I;return {x:a,p:s*Math.cos(ph),q:s*Math.sin(ph),pf:Math.cos(ph)}});return {headline:`S = ${fmt(S)} VA`,phase:`φ = ${fmt(+v.phi)}°`,complex:`S = ${fmt(P)} ${Q>=0?'+':'-'} j${fmt(Math.abs(Q))} VA\npf = ${fmt(pf)}`,cards:[['P',`${fmt(P)} W`],['Q',`${fmt(Q)} var`],['S',`${fmt(S)} VA`],['pf',fmt(pf)],['U',`${fmt(U)} V`],['I',`${fmt(I)} A`]],chart:{label:'P(W)',xlabel:'φ, deg',data:rows.map(r=>({x:r.x,y:r.p}))},table:{head:['φ, deg','P, W','Q, var','pf'],rows:rows.map(r=>[fmt(r.x),fmt(r.p),fmt(r.q),fmt(r.pf)])}};}
+
+    function computeFirstOrder(v,type){const Uin=+v.Uin,R=+v.R;const rows=buildLogSweep(+v.freqStart,+v.freqEnd,+v.points).map(f=>{const w=2*Math.PI*f;let mag,phase,fc;if(type==='rc'){const C=+v.C;const x=w*R*C;mag=1/Math.sqrt(1+x*x);phase=-deg(Math.atan(x));fc=1/(2*Math.PI*R*C);} else {const L=+v.L;const x=w*L/R;mag=x/Math.sqrt(1+x*x);phase=90-deg(Math.atan(x));fc=R/(2*Math.PI*L);}return {x:f,gain:mag,out:Uin*mag,phase,db:20*Math.log10(Math.max(mag,1e-12)),fc};});const fc=rows[0].fc;const nearest=rows.reduce((a,b)=>Math.abs(b.x-fc)<Math.abs(a.x-fc)?b:a,rows[0]);return {headline:`fc = ${fmt(fc)} Hz`,phase:`${fmt(nearest.phase)}°`,complex:`|H(jω)| = ${fmt(nearest.gain)}\nGain = ${fmt(nearest.db)} dB\nUout@fc = ${fmt(nearest.out)} V`,cards:[['fc',`${fmt(fc)} Hz`],['|H|@fc',fmt(nearest.gain)],['Gain@fc',`${fmt(nearest.db)} dB`],['Uout@fc',`${fmt(nearest.out)} V`],['Phase@fc',`${fmt(nearest.phase)}°`],['Uin',`${fmt(Uin)} V`]],chart:{label:'Gain(dB)',xlabel:'f, Hz',data:rows.map(r=>({x:r.x,y:r.db})),logX:true},table:{head:['f, Hz','|H|','Gain, dB','Uout, V','φ, deg'],rows:rows.map(r=>[fmt(r.x),fmt(r.gain),fmt(r.db),fmt(r.out),fmt(r.phase)])}};}
+
+    function computeComplexImpedance(v){const U=+v.U,R=+v.R,X=+v.X;const mag=Math.hypot(R,X),phase=Math.atan2(X,R),I=U/mag,P=I*I*R,Q=I*I*X,S=U*I;const Yre=R/(mag*mag),Yim=-X/(mag*mag);const rows=buildLinearSweep(+v.freqStart,+v.freqEnd,+v.points).map(f=>{const xs=X*(f/50);const zs=Math.hypot(R,xs);return {x:f,z:zs,i:U/zs,phi:deg(Math.atan2(xs,R))};});return {headline:`|Z| = ${fmt(mag)} Ω`,phase:`${fmt(deg(phase))}°`,complex:`Z = ${fmt(R)} ${X>=0?'+':'-'} j${fmt(Math.abs(X))} Ω\nY = ${fmt(Yre)} ${Yim>=0?'+':'-'} j${fmt(Math.abs(Yim))} S\nI = ${fmt(I)} ∠ ${fmt(-deg(phase))} A`,cards:[['|Z|',`${fmt(mag)} Ω`],['φ',`${fmt(deg(phase))}°`],['I',`${fmt(I)} A`],['P',`${fmt(P)} W`],['Q',`${fmt(Q)} var`],['S',`${fmt(S)} VA`]],chart:{label:'|Z|(Ω)',xlabel:'f, Hz',data:rows.map(r=>({x:r.x,y:r.z}))},table:{head:['f, Hz','|Z|, Ω','I, A','φ, deg'],rows:rows.map(r=>[fmt(r.x),fmt(r.z),fmt(r.i),fmt(r.phi)])}};}
+
+    function computeRLC(v,type){const U=+v.U,R=+v.R,L=+v.L,C=+v.C;const f0=1/(2*Math.PI*Math.sqrt(L*C));const Q=type==='series'?(1/R)*Math.sqrt(L/C):R*Math.sqrt(C/L);const rows=buildLogSweep(+v.freqStart,+v.freqEnd,+v.points).map(f=>{const w=2*Math.PI*f,XL=w*L,XC=1/(w*C);let Zmag,phase;if(type==='series'){const X=XL-XC;Zmag=Math.hypot(R,X);phase=deg(Math.atan2(X,R));}else{const Yre=1/R,Yim=(1/XC)-(1/XL);const Ymag=Math.hypot(Yre,Yim);Zmag=1/Ymag;phase=-deg(Math.atan2(Yim,Yre));}const I=U/Zmag;const gain=type==='series'?I:Zmag/R;return {x:f,z:Zmag,i:I,phase,gainDb:20*Math.log10(Math.max(gain,1e-12))};});const nearest=rows.reduce((a,b)=>Math.abs(b.x-f0)<Math.abs(a.x-f0)?b:a,rows[0]);return {headline:`f0 = ${fmt(f0)} Hz`,phase:`${fmt(nearest.phase)}°`,complex:`${type==='series'?'Zs':'Zp'}(f0) = ${fmt(nearest.z)} Ω\nQ = ${fmt(Q)}\nGain@f0 = ${fmt(nearest.gainDb)} dB`,cards:[['f0',`${fmt(f0)} Hz`],['Q',fmt(Q)],['|Z|@f0',`${fmt(nearest.z)} Ω`],['I@f0',`${fmt(nearest.i)} A`],['φ@f0',`${fmt(nearest.phase)}°`],['Gain@f0',`${fmt(nearest.gainDb)} dB`]],chart:{label:'Gain(dB)',xlabel:'f, Hz',data:rows.map(r=>({x:r.x,y:r.gainDb})),logX:true},table:{head:['f, Hz','|Z|, Ω','I, A','φ, deg','Gain, dB'],rows:rows.map(r=>[fmt(r.x),fmt(r.z),fmt(r.i),fmt(r.phase),fmt(r.gainDb)])}};}
+
+    function computeWaveforms(v){const Um=+v.Um,Im=+v.Im,phi=rad(+v.phi),f=+v.freq,periods=+v.periods,points=+v.points;const rows=[];for(let i=0;i<points;i++){const t=i/(points-1)*periods/f;rows.push({x:t*1000,u:Um*Math.sin(2*Math.PI*f*t),ii:Im*Math.sin(2*Math.PI*f*t-phi)})}return {headline:`φ = ${fmt(+v.phi)}°`,phase:`Δt = ${fmt((phi/(2*Math.PI*f))*1000)} ms`,complex:`Û = ${fmt(Um)} ∠ 0° V\nÎ = ${fmt(Im)} ∠ ${fmt(-deg(phi))}° A`,cards:[['U rms',`${fmt(Um/Math.sqrt(2))} V`],['I rms',`${fmt(Im/Math.sqrt(2))} A`],['Δt',`${fmt((phi/(2*Math.PI*f))*1000)} ms`],['f',`${fmt(f)} Hz`],['T',`${fmt(1000/f)} ms`],['φ',`${fmt(+v.phi)}°`]],chart:{multi:true,xlabel:'t, ms',series:[{label:'u(t), V',data:rows.map(r=>({x:r.x,y:r.u})),color:getCSS('--color-primary')},{label:'i(t), A',data:rows.map(r=>({x:r.x,y:r.ii})),color:getCSS('--color-orange')}]},table:{head:['t, ms','u(t), V','i(t), A'],rows:rows.map(r=>[fmt(r.x),fmt(r.u),fmt(r.ii)])}};}
+
+    function mean(arr){return arr.reduce((a,b)=>a+b,0)/arr.length}
+    function std(arr){const m=mean(arr); return Math.sqrt(mean(arr.map(v=>(v-m)**2)))}
+    function percentile(arr,p){const a=[...arr].sort((x,y)=>x-y); const i=(a.length-1)*p; const lo=Math.floor(i), hi=Math.ceil(i); if(lo===hi) return a[lo]; return a[lo]+(a[hi]-a[lo])*(i-lo)}
+    function randUniformTol(tol){return (Math.random()*2-1)*(tol/100)}
+
+    function computeTolerance(v){
+        const Uin=+v.Uin,R1=+v.R1,R2=+v.R2,tol1=+v.tol1,tol2=+v.tol2,points=Math.max(11,+v.points||121);
+        const nominal=Uin*R2/(R1+R2);
+        const rows=buildLinearSweep(-1,1,points).map(k=>{
+            const r1=R1*(1+k*tol1/100), r2min=R2*(1-tol2/100), r2max=R2*(1+tol2/100), r2nom=R2*(1+k*tol2/100);
+            return {
+                x:k*100,
+                nominal:Uin*r2nom/(r1+r2nom),
+                min:Uin*r2min/(r1+r2min),
+                max:Uin*r2max/(r1+r2max)
+            };
+        });
+        const worstMin = Uin*(R2*(1-tol2/100))/((R1*(1+tol1/100))+(R2*(1-tol2/100)));
+        const worstMax = Uin*(R2*(1+tol2/100))/((R1*(1-tol1/100))+(R2*(1+tol2/100)));
+        const spread = ((worstMax-worstMin)/nominal)*100;
+        return {
+            headline:`Uout = ${fmt(nominal)} V`,
+            phase:`Range ${fmt(worstMin)}…${fmt(worstMax)} V`,
+            complex:`Nominal: ${fmt(nominal)} V\nWorst-case min: ${fmt(worstMin)} V\nWorst-case max: ${fmt(worstMax)} V\nSpread: ${fmt(spread)} %`,
+            cards:[['Uout nom',`${fmt(nominal)} V`],['Uout min',`${fmt(worstMin)} V`],['Uout max',`${fmt(worstMax)} V`],['ΔU span',`${fmt(worstMax-worstMin)} V`],['Spread',`${fmt(spread)} %`],['Gain K',fmt(nominal/Uin)]],
+            chart:{multi:true,xlabel:'Tolerance shift, %',series:[
+                    {label:'Nominal path',data:rows.map(r=>({x:r.x,y:r.nominal})),color:getCSS('--color-primary')},
+                    {label:'Min envelope',data:rows.map(r=>({x:r.x,y:r.min})),color:getCSS('--color-orange')},
+                    {label:'Max envelope',data:rows.map(r=>({x:r.x,y:r.max})),color:getCSS('--color-success')}
+                ]},
+            table:{head:['Shift, %','Uout nom, V','Uout min, V','Uout max, V'],rows:rows.map(r=>[fmt(r.x),fmt(r.nominal),fmt(r.min),fmt(r.max)])}
+        };
+    }
+    function std(arr){const m=mean(arr); return Math.sqrt(mean(arr.map(v=>(v-m)**2)))}
+    function percentile(arr,p){const a=[...arr].sort((x,y)=>x-y); const i=(a.length-1)*p; const lo=Math.floor(i), hi=Math.ceil(i); if(lo===hi) return a[lo]; return a[lo]+(a[hi]-a[lo])*(i-lo)}
+    function randUniformTol(tol){return (Math.random()*2-1)*(tol/100)}
+
+    function computeTolerance(v){
+        const Uin=+v.Uin,R1=+v.R1,R2=+v.R2,tol1=+v.tol1,tol2=+v.tol2,points=Math.max(11,+v.points||121);
+        const nominal=Uin*R2/(R1+R2);
+        const rows=buildLinearSweep(-1,1,points).map(k=>{
+            const r1=R1*(1+k*tol1/100), r2min=R2*(1-tol2/100), r2max=R2*(1+tol2/100), r2nom=R2*(1+k*tol2/100);
+            return {
+                x:k*100,
+                nominal:Uin*r2nom/(r1+r2nom),
+                min:Uin*r2min/(r1+r2min),
+                max:Uin*r2max/(r1+r2max)
+            };
+        });
+        const worstMin = Uin*(R2*(1-tol2/100))/((R1*(1+tol1/100))+(R2*(1-tol2/100)));
+        const worstMax = Uin*(R2*(1+tol2/100))/((R1*(1-tol1/100))+(R2*(1+tol2/100)));
+        const spread = ((worstMax-worstMin)/nominal)*100;
+        return {
+            headline:`Uout = ${fmt(nominal)} V`,
+            phase:`Range ${fmt(worstMin)}…${fmt(worstMax)} V`,
+            complex:`Nominal: ${fmt(nominal)} V\nWorst-case min: ${fmt(worstMin)} V\nWorst-case max: ${fmt(worstMax)} V\nSpread: ${fmt(spread)} %`,
+            cards:[['Uout nom',`${fmt(nominal)} V`],['Uout min',`${fmt(worstMin)} V`],['Uout max',`${fmt(worstMax)} V`],['ΔU span',`${fmt(worstMax-worstMin)} V`],['Spread',`${fmt(spread)} %`],['Gain K',fmt(nominal/Uin)]],
+            chart:{multi:true,xlabel:'Tolerance shift, %',series:[
+                    {label:'Nominal path',data:rows.map(r=>({x:r.x,y:r.nominal})),color:getCSS('--color-primary')},
+                    {label:'Min envelope',data:rows.map(r=>({x:r.x,y:r.min})),color:getCSS('--color-orange')},
+                    {label:'Max envelope',data:rows.map(r=>({x:r.x,y:r.max})),color:getCSS('--color-success')}
+                ]},
+            table:{head:['Shift, %','Uout nom, V','Uout min, V','Uout max, V'],rows:rows.map(r=>[fmt(r.x),fmt(r.nominal),fmt(r.min),fmt(r.max)])}
+        };
+    }
+    function percentile(arr,p){const a=[...arr].sort((x,y)=>x-y); const i=(a.length-1)*p; const lo=Math.floor(i), hi=Math.ceil(i); if(lo===hi) return a[lo]; return a[lo]+(a[hi]-a[lo])*(i-lo)}
+    function randUniformTol(tol){return (Math.random()*2-1)*(tol/100)}
+
+    function computeTolerance(v){
+        const Uin=+v.Uin,R1=+v.R1,R2=+v.R2,tol1=+v.tol1,tol2=+v.tol2,points=Math.max(11,+v.points||121);
+        const nominal=Uin*R2/(R1+R2);
+        const rows=buildLinearSweep(-1,1,points).map(k=>{
+            const r1=R1*(1+k*tol1/100), r2min=R2*(1-tol2/100), r2max=R2*(1+tol2/100), r2nom=R2*(1+k*tol2/100);
+            return {
+                x:k*100,
+                nominal:Uin*r2nom/(r1+r2nom),
+                min:Uin*r2min/(r1+r2min),
+                max:Uin*r2max/(r1+r2max)
+            };
+        });
+        const worstMin = Uin*(R2*(1-tol2/100))/((R1*(1+tol1/100))+(R2*(1-tol2/100)));
+        const worstMax = Uin*(R2*(1+tol2/100))/((R1*(1-tol1/100))+(R2*(1+tol2/100)));
+        const spread = ((worstMax-worstMin)/nominal)*100;
+        return {
+            headline:`Uout = ${fmt(nominal)} V`,
+            phase:`Range ${fmt(worstMin)}…${fmt(worstMax)} V`,
+            complex:`Nominal: ${fmt(nominal)} V\nWorst-case min: ${fmt(worstMin)} V\nWorst-case max: ${fmt(worstMax)} V\nSpread: ${fmt(spread)} %`,
+            cards:[['Uout nom',`${fmt(nominal)} V`],['Uout min',`${fmt(worstMin)} V`],['Uout max',`${fmt(worstMax)} V`],['ΔU span',`${fmt(worstMax-worstMin)} V`],['Spread',`${fmt(spread)} %`],['Gain K',fmt(nominal/Uin)]],
+            chart:{multi:true,xlabel:'Tolerance shift, %',series:[
+                    {label:'Nominal path',data:rows.map(r=>({x:r.x,y:r.nominal})),color:getCSS('--color-primary')},
+                    {label:'Min envelope',data:rows.map(r=>({x:r.x,y:r.min})),color:getCSS('--color-orange')},
+                    {label:'Max envelope',data:rows.map(r=>({x:r.x,y:r.max})),color:getCSS('--color-success')}
+                ]},
+            table:{head:['Shift, %','Uout nom, V','Uout min, V','Uout max, V'],rows:rows.map(r=>[fmt(r.x),fmt(r.nominal),fmt(r.min),fmt(r.max)])}
+        };
+    }
+    function randUniformTol(tol){return (Math.random()*2-1)*(tol/100)}
+
+    function computeTolerance(v){
+        const Uin=+v.Uin,R1=+v.R1,R2=+v.R2,tol1=+v.tol1,tol2=+v.tol2,points=Math.max(11,+v.points||121);
+        const nominal=Uin*R2/(R1+R2);
+        const rows=buildLinearSweep(-1,1,points).map(k=>{
+            const r1=R1*(1+k*tol1/100), r2min=R2*(1-tol2/100), r2max=R2*(1+tol2/100), r2nom=R2*(1+k*tol2/100);
+            return {
+                x:k*100,
+                nominal:Uin*r2nom/(r1+r2nom),
+                min:Uin*r2min/(r1+r2min),
+                max:Uin*r2max/(r1+r2max)
+            };
+        });
+        const worstMin = Uin*(R2*(1-tol2/100))/((R1*(1+tol1/100))+(R2*(1-tol2/100)));
+        const worstMax = Uin*(R2*(1+tol2/100))/((R1*(1-tol1/100))+(R2*(1+tol2/100)));
+        const spread = ((worstMax-worstMin)/nominal)*100;
+        return {
+            headline:`Uout = ${fmt(nominal)} V`,
+            phase:`Range ${fmt(worstMin)}…${fmt(worstMax)} V`,
+            complex:`Nominal: ${fmt(nominal)} V\nWorst-case min: ${fmt(worstMin)} V\nWorst-case max: ${fmt(worstMax)} V\nSpread: ${fmt(spread)} %`,
+            cards:[['Uout nom',`${fmt(nominal)} V`],['Uout min',`${fmt(worstMin)} V`],['Uout max',`${fmt(worstMax)} V`],['ΔU span',`${fmt(worstMax-worstMin)} V`],['Spread',`${fmt(spread)} %`],['Gain K',fmt(nominal/Uin)]],
+            chart:{multi:true,xlabel:'Tolerance shift, %',series:[
+                    {label:'Nominal path',data:rows.map(r=>({x:r.x,y:r.nominal})),color:getCSS('--color-primary')},
+                    {label:'Min envelope',data:rows.map(r=>({x:r.x,y:r.min})),color:getCSS('--color-orange')},
+                    {label:'Max envelope',data:rows.map(r=>({x:r.x,y:r.max})),color:getCSS('--color-success')}
+                ]},
+            table:{head:['Shift, %','Uout nom, V','Uout min, V','Uout max, V'],rows:rows.map(r=>[fmt(r.x),fmt(r.nominal),fmt(r.min),fmt(r.max)])}
+        };
+    }
+    function computeTolerance(v){
+        const Uin=+v.Uin,R1=+v.R1,R2=+v.R2,tol1=+v.tol1,tol2=+v.tol2,points=Math.max(11,+v.points||121);
+        const nominal=Uin*R2/(R1+R2);
+        const rows=buildLinearSweep(-1,1,points).map(k=>{
+            const r1=R1*(1+k*tol1/100), r2min=R2*(1-tol2/100), r2max=R2*(1+tol2/100), r2nom=R2*(1+k*tol2/100);
+            return {
+                x:k*100,
+                nominal:Uin*r2nom/(r1+r2nom),
+                min:Uin*r2min/(r1+r2min),
+                max:Uin*r2max/(r1+r2max)
+            };
+        });
+        const worstMin = Uin*(R2*(1-tol2/100))/((R1*(1+tol1/100))+(R2*(1-tol2/100)));
+        const worstMax = Uin*(R2*(1+tol2/100))/((R1*(1-tol1/100))+(R2*(1+tol2/100)));
+        const spread = ((worstMax-worstMin)/nominal)*100;
+        return {
+            headline:`Uout = ${fmt(nominal)} V`,
+            phase:`Range ${fmt(worstMin)}…${fmt(worstMax)} V`,
+            complex:`Nominal: ${fmt(nominal)} V\nWorst-case min: ${fmt(worstMin)} V\nWorst-case max: ${fmt(worstMax)} V\nSpread: ${fmt(spread)} %`,
+            cards:[['Uout nom',`${fmt(nominal)} V`],['Uout min',`${fmt(worstMin)} V`],['Uout max',`${fmt(worstMax)} V`],['ΔU span',`${fmt(worstMax-worstMin)} V`],['Spread',`${fmt(spread)} %`],['Gain K',fmt(nominal/Uin)]],
+            chart:{multi:true,xlabel:'Tolerance shift, %',series:[
+                    {label:'Nominal path',data:rows.map(r=>({x:r.x,y:r.nominal})),color:getCSS('--color-primary')},
+                    {label:'Min envelope',data:rows.map(r=>({x:r.x,y:r.min})),color:getCSS('--color-orange')},
+                    {label:'Max envelope',data:rows.map(r=>({x:r.x,y:r.max})),color:getCSS('--color-success')}
+                ]},
+            table:{head:['Shift, %','Uout nom, V','Uout min, V','Uout max, V'],rows:rows.map(r=>[fmt(r.x),fmt(r.nominal),fmt(r.min),fmt(r.max)])}
+        };
+    }
+    function computeSensitivity(v){
+        const R=+v.R,L=+v.L,C=+v.C,f=+v.f,delta=Math.max(0.1,+v.delta||1)/100,points=Math.max(11,+v.points||61);
+        const f0=1/(2*Math.PI*Math.sqrt(L*C));
+        const Q=(1/R)*Math.sqrt(L/C);
+        const w=2*Math.PI*f, X=w*L-1/(w*C), Z=Math.hypot(R,X);
+        const base={f0,Q,Z};
+        const params={R,L,C};
+        function metrics(p){const f0m=1/(2*Math.PI*Math.sqrt(p.L*p.C)); const Qm=(1/p.R)*Math.sqrt(p.L/p.C); const Xm=w*p.L-1/(w*p.C); const Zm=Math.hypot(p.R,Xm); return {f0:f0m,Q:Qm,Z:Zm};}
+        const names=['R','L','C'];
+        const sensitivities=[];
+        names.forEach(name=>{
+            const up={...params,[name]:params[name]*(1+delta)};
+            const down={...params,[name]:params[name]*(1-delta)};
+            const mu=metrics(up), md=metrics(down);
+            ['f0','Q','Z'].forEach(target=>{
+                const s=((mu[target]-md[target])/(2*delta*base[target]));
+                sensitivities.push({param:name,target,S:s});
+            });
+        });
+        const dominant=sensitivities.reduce((a,b)=>Math.abs(b.S)>Math.abs(a.S)?b:a,sensitivities[0]);
+        const rows=buildLinearSweep(-5,5,points).map(pct=>{
+            const factor=1+pct/100;
+            const q=(1/(R*factor))*Math.sqrt(L/C);
+            return {x:pct,y:q};
+        });
+        return {
+            headline:`f0 = ${fmt(f0)} Hz`,
+            phase:`Dominant: ${dominant.target}/${dominant.param} = ${fmt(dominant.S)}`,
+            complex:`Base f0 = ${fmt(f0)} Hz\nBase Q = ${fmt(Q)}\nBase |Z| = ${fmt(Z)} Ω\nMax |S| => ${dominant.target} vs ${dominant.param}: ${fmt(dominant.S)}`,
+            cards:[['f0',`${fmt(f0)} Hz`],['Q',fmt(Q)],['|Z|',`${fmt(Z)} Ω`],['S(f0,L)',fmt(sensitivities.find(x=>x.param==='L'&&x.target==='f0').S)],['S(f0,C)',fmt(sensitivities.find(x=>x.param==='C'&&x.target==='f0').S)],['S(Q,R)',fmt(sensitivities.find(x=>x.param==='R'&&x.target==='Q').S)]],
+            chart:{label:'Q vs ΔR(%)',xlabel:'ΔR, %',data:rows.map(r=>({x:r.x,y:r.y}))},
+            table:{head:['Param','Target','Sensitivity Sx'],rows:sensitivities.map(r=>[r.param,r.target,fmt(r.S)])}
+        };
+    }
+    function computeMonteCarlo(v){
+        const R=+v.R,L=+v.L,C=+v.C,tolR=+v.tolR,tolL=+v.tolL,tolC=+v.tolC,samples=Math.max(100,Math.min(3000,Math.round(+v.samples||500)));
+        const rows=[];
+        for(let i=0;i<samples;i++){
+            const r=R*(1+randUniformTol(tolR));
+            const l=L*(1+randUniformTol(tolL));
+            const c=C*(1+randUniformTol(tolC));
+            const f0=1/(2*Math.PI*Math.sqrt(l*c));
+            const Q=(1/r)*Math.sqrt(l/c);
+            rows.push({x:i+1,f0,Q,R:r,L:l,C:c});
+        }
+        const f0s=rows.map(r=>r.f0), Qs=rows.map(r=>r.Q);
+        return {
+            headline:`μf0 = ${fmt(mean(f0s))} Hz`,
+            phase:`σf0 = ${fmt(std(f0s))} Hz`,
+            complex:`Samples = ${samples}\nMean f0 = ${fmt(mean(f0s))} Hz\nP5…P95 f0 = ${fmt(percentile(f0s,.05))}…${fmt(percentile(f0s,.95))} Hz\nMean Q = ${fmt(mean(Qs))}`,
+            cards:[['Mean f0',`${fmt(mean(f0s))} Hz`],['Std f0',`${fmt(std(f0s))} Hz`],['P5 f0',`${fmt(percentile(f0s,.05))} Hz`],['P95 f0',`${fmt(percentile(f0s,.95))} Hz`],['Mean Q',fmt(mean(Qs))],['Std Q',fmt(std(Qs))]],
+            chart:{label:'f0 samples',xlabel:'Sample #',data:rows.map(r=>({x:r.x,y:r.f0}))},
+            table:{head:['Sample','f0, Hz','Q','R, Ω','L, H','C, F'],rows:rows.slice(0,300).map(r=>[r.x,fmt(r.f0),fmt(r.Q),fmt(r.R),fmt(r.L),fmt(r.C)])}
+        };
+    }
+    function computeRLCPlus(v){
+        const U=+v.U,R=+v.R,L=+v.L,C=+v.C;
+        const rows=buildLogSweep(+v.freqStart,+v.freqEnd,+v.points).map(f=>{const w=2*Math.PI*f, X=w*L-1/(w*C), Z=Math.hypot(R,X), I=U/Z; return {x:f,z:Z,i:I,db:20*Math.log10(Math.max(I,1e-12))};});
+        const peak=rows.reduce((a,b)=>b.i>a.i?b:a,rows[0]);
+        const half=peak.i/Math.sqrt(2);
+        const below=rows.filter(r=>r.x<peak.x && r.i<=half).at(-1) || rows[0];
+        const above=rows.find(r=>r.x>peak.x && r.i<=half) || rows.at(-1);
+        const bw=above.x-below.x;
+        const qApprox=peak.x/Math.max(bw,1e-9);
+        return {
+            headline:`Peak @ ${fmt(peak.x)} Hz`,
+            phase:`BW ≈ ${fmt(bw)} Hz`,
+            complex:`Peak current = ${fmt(peak.i)} A\n-3 dB band: ${fmt(below.x)}…${fmt(above.x)} Hz\nApprox Q = ${fmt(qApprox)}`,
+            cards:[['Peak f',`${fmt(peak.x)} Hz`],['Peak I',`${fmt(peak.i)} A`],['|Z| peak',`${fmt(peak.z)} Ω`],['f1',`${fmt(below.x)} Hz`],['f2',`${fmt(above.x)} Hz`],['Q approx',fmt(qApprox)]],
+            chart:{label:'I(A)',xlabel:'f, Hz',data:rows.map(r=>({x:r.x,y:r.i})),logX:true},
+            table:{head:['f, Hz','|Z|, Ω','I, A','20log10(I)'],rows:rows.map(r=>[fmt(r.x),fmt(r.z),fmt(r.i),fmt(r.db)])}
+        };
+    }
+    function computeHarmonics(v){
+        const values=[+v.I1,+v.I3,+v.I5,+v.I7,+v.I9];
+        const orders=[1,3,5,7,9];
+        const I1=values[0];
+        const thd=Math.sqrt(values.slice(1).reduce((a,b)=>a+b*b,0))/Math.max(I1,1e-9);
+        const rms=Math.sqrt(values.reduce((a,b)=>a+b*b,0));
+        const crest=Math.sqrt(2)*(rms/Math.max(I1,1e-9));
+        const rows=orders.map((n,i)=>({x:n,y:values[i]}));
+        return {
+            headline:`THD = ${fmt(thd*100)} %`,
+            phase:`Irms = ${fmt(rms)} A`,
+            complex:`I1 = ${fmt(I1)} A\nTHD = ${fmt(thd*100)} %\nIrms(total) = ${fmt(rms)} A\nCrest estimate = ${fmt(crest)}`,
+            cards:[['THD',`${fmt(thd*100)} %`],['I1',`${fmt(I1)} A`],['Irms',`${fmt(rms)} A`],['I3/I1',fmt(values[1]/Math.max(I1,1e-9))],['I5/I1',fmt(values[2]/Math.max(I1,1e-9))],['Crest',fmt(crest)]],
+            chart:{label:'In(A)',xlabel:'Harmonic number',data:rows.map(r=>({x:r.x,y:r.y}))},
+            table:{head:['n','In, A','In/I1'],rows:rows.map(r=>[r.x,fmt(r.y),fmt(r.y/Math.max(I1,1e-9))])}
+        };
+    }
+    function computeThreePhase(v){
+        const UL=+v.UL, IL=+v.IL, phi=rad(+v.phi), eta=Math.max(1,+v.eta)/100;
+        const P=Math.sqrt(3)*UL*IL*Math.cos(phi);
+        const S=Math.sqrt(3)*UL*IL;
+        const Q=Math.sqrt(3)*UL*IL*Math.sin(phi);
+        const Uph=UL/Math.sqrt(3);
+        const Pin=P/eta;
+        const rows=buildLinearSweep(+v.varStart,+v.varEnd,+v.points).map(a=>{const ph=rad(a); return {x:a,p:Math.sqrt(3)*UL*IL*Math.cos(ph),q:Math.sqrt(3)*UL*IL*Math.sin(ph),pf:Math.cos(ph)}});
+        return {
+            headline:`P = ${fmt(P)} W`,
+            phase:`PF = ${fmt(Math.cos(phi))}`,
+            complex:`S = ${fmt(S)} VA\nP = ${fmt(P)} W\nQ = ${fmt(Q)} var\nInput with η = ${fmt(Pin)} W`,
+            cards:[['P',`${fmt(P)} W`],['Q',`${fmt(Q)} var`],['S',`${fmt(S)} VA`],['PF',fmt(Math.cos(phi))],['Uphase',`${fmt(Uph)} V`],['Pin/η',`${fmt(Pin)} W`]],
+            chart:{multi:true,xlabel:'φ, deg',series:[
+                    {label:'P',data:rows.map(r=>({x:r.x,y:r.p})),color:getCSS('--color-primary')},
+                    {label:'Q',data:rows.map(r=>({x:r.x,y:r.q})),color:getCSS('--color-orange')}
+                ]},
+            table:{head:['φ, deg','P, W','Q, var','PF'],rows:rows.map(r=>[fmt(r.x),fmt(r.p),fmt(r.q),fmt(r.pf)])}
+        };
+    }
+    function computePhasor(v){const U=+v.U,I=+v.I,phiU=rad(+v.phiU),phiI=rad(+v.phiI);const ux=U*Math.cos(phiU),uy=U*Math.sin(phiU),ix=I*Math.cos(phiI),iy=I*Math.sin(phiI);const rows=buildLinearSweep(+v.scaleStart,+v.scaleEnd,+v.points).map(a=>({x:a,y:I*Math.cos(rad(a))}));return {headline:`I∠ = ${fmt(+v.phiI)}°`,phase:`Δφ = ${fmt(+v.phiI-+v.phiU)}°`,complex:`U = ${fmt(ux)} ${uy>=0?'+':'-'} j${fmt(Math.abs(uy))}\nI = ${fmt(ix)} ${iy>=0?'+':'-'} j${fmt(Math.abs(iy))}`,cards:[['Ux',fmt(ux)],['Uy',fmt(uy)],['Ix',fmt(ix)],['Iy',fmt(iy)],['|U|',fmt(U)],['|I|',fmt(I)]],chart:{label:'Re(I)',xlabel:'φI, deg',data:rows.map(r=>({x:r.x,y:r.y}))},table:{head:['φI, deg','Re(I)'],rows:rows.map(r=>[fmt(r.x),fmt(r.y)])}};}
+
+    function initNav(){const wrap=document.getElementById('nav');wrap.innerHTML='';Object.entries(MODE_GROUPS).forEach(([group,keys])=>{const block=document.createElement('div');const title=document.createElement('div');title.className='group-title';title.textContent=group;block.appendChild(title);const navGroup=document.createElement('div');navGroup.className='nav-group';keys.forEach(key=>{const sec=appState.sections[key];const btn=document.createElement('button');btn.innerHTML=`<strong>${sec.title}</strong><small>${sec.description}</small>`;if(key===appState.section)btn.className='active';btn.onclick=()=>{appState.section=key;appState.submode=Object.keys(sec.submodes)[0];render();};navGroup.appendChild(btn);});block.appendChild(navGroup);wrap.appendChild(block);});if(!appState.submode) appState.submode=Object.keys(appState.sections[appState.section].submodes)[0];}
+    function renderSubmodes(sec){const wrap=document.getElementById('submodeChips');wrap.innerHTML='';Object.entries(sec.submodes).forEach(([key,sub])=>{const b=document.createElement('button');b.className='chip'+(key===appState.submode?' active':'');b.textContent=sub.name;b.onclick=()=>{appState.submode=key;render();};wrap.appendChild(b);});}
+    function renderFields(sub){const wrap=document.getElementById('fields');wrap.innerHTML='';sub.fields.forEach(f=>{const div=document.createElement('div');div.className='field';const ro=f.readonly?'readonly':'';div.innerHTML=`<label for="fld_${f.key}">${f.label}</label><input id="fld_${f.key}" type="number" step="any" value="${f.value}" ${ro}><div class="hint">${f.readonly?'Read-only field':'Change the parameter and recalculate.'}</div>`;wrap.appendChild(div);});}
+    function collectValues(sub){const out={};sub.fields.forEach(f=>{const el=document.getElementById('fld_'+f.key);out[f.key]=el?el.value:f.value;});return out;}
+    function renderResults(cards){const wrap=document.getElementById('results');wrap.innerHTML='';cards.forEach(([k,v])=>{const c=document.createElement('div');c.className='card';c.innerHTML=`<div class="k">${k}</div><div class="v">${v}</div>`;wrap.appendChild(c);});}
+    function renderTable(table){document.getElementById('tableHead').innerHTML=table.head.map(h=>`<th>${h}</th>`).join('');document.getElementById('tableBody').innerHTML=table.rows.slice(0,300).map(r=>`<tr>${r.map(v=>`<td>${v}</td>`).join('')}</tr>`).join('');appState.currentSweep=[table.head,...table.rows];}
+    function renderChart(chart){const ctx=document.getElementById('mainChart');if(appState.chart)appState.chart.destroy();let datasets=[];if(chart.multi){datasets=chart.series.map(s=>({label:s.label,data:s.data,borderColor:s.color,backgroundColor:s.color,pointRadius:0,borderWidth:2,tension:.18}));} else {datasets=[{label:chart.label,data:chart.data,borderColor:getCSS('--color-primary'),backgroundColor:getCSS('--color-primary'),pointRadius:0,borderWidth:2,tension:.18}];}
+        appState.chart=new Chart(ctx,{type:'line',data:{datasets},options:{responsive:true,maintainAspectRatio:false,parsing:false,interaction:{mode:'nearest',intersect:false},plugins:{legend:{labels:{color:getCSS('--color-text')}}},scales:{x:{type:'linear',ticks:{color:getCSS('--color-text-muted')},title:{display:true,text:chart.xlabel,color:getCSS('--color-text-muted')},grid:{color:'rgba(120,120,120,.12)'}},y:{ticks:{color:getCSS('--color-text-muted')},grid:{color:'rgba(120,120,120,.12)'}}}}});document.getElementById('chartTitle').textContent=chart.multi?'Charts':`Chart: ${chart.label}`;}
+    function calculate(){const sec=appState.sections[appState.section];const sub=sec.submodes[appState.submode];const values=collectValues(sub);const out=sub.compute(values);document.getElementById('sectionTitle').textContent=sec.title;document.getElementById('sectionDescription').textContent=sec.description;document.getElementById('equationBox').textContent=sec.equation;document.getElementById('activeModeLabel').textContent=sub.name;document.getElementById('headlineMetric').textContent=out.headline;document.getElementById('phaseMetric').textContent=out.phase;document.getElementById('sweepMetric').textContent=String(values.points||'—');document.getElementById('complexView').textContent=out.complex;document.getElementById('footnote').textContent=sec.foot;renderResults(out.cards);renderChart(out.chart);renderTable(out.table);}
+    function render(){initNav();const sec=appState.sections[appState.section];if(!appState.submode || !sec.submodes[appState.submode])appState.submode=Object.keys(sec.submodes)[0];renderSubmodes(sec);renderFields(sec.submodes[appState.submode]);calculate();}
+    function exportCsv(){const rows=appState.currentSweep||[];const csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${appState.section}-${appState.submode}.csv`;a.click();URL.revokeObjectURL(url);}
+    function resetActive(){const sub=appState.sections[appState.section].submodes[appState.submode];sub.fields.forEach(f=>{const el=document.getElementById('fld_'+f.key);if(el && !f.readonly)el.value=f.value;});calculate();}
+    document.getElementById('calculateBtn').onclick=calculate;document.getElementById('exportCsvBtn').onclick=exportCsv;document.getElementById('resetAll').onclick=resetActive;(function(){const t=document.getElementById('themeToggle'),r=document.documentElement;let d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';r.setAttribute('data-theme',d);t.onclick=()=>{d=d==='dark'?'light':'dark';r.setAttribute('data-theme',d);calculate();};})();render();
+</script>
+</body>
+</html>
